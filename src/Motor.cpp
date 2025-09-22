@@ -3,23 +3,24 @@
 #include <cmath>
 
 Motor::Motor(double resistance, double inductance, double back_emf_constant, 
-             double torque_constant, double inertia, double friction)
+             double torque_constant, double inertia, double friction,
+             double max_angular_velocity_rpm)
     : voltage_(0.0), current_(0.0), torque_(0.0), angular_velocity_(0.0), 
       angular_position_(0.0), resistance_(resistance), inductance_(inductance),
       back_emf_constant_(back_emf_constant), torque_constant_(torque_constant),
       inertia_(inertia), friction_(friction), max_voltage_(12.0), max_current_(10.0) {
+    
+    // Convert RPM to rad/s: RPM * (2*π/60)
+    max_angular_velocity_ = max_angular_velocity_rpm * (2.0 * M_PI / 60.0);
 }
 
 void Motor::update(double dt, double load_torque) {
     // Clamp voltage to limits
     voltage_ = std::clamp(voltage_, -max_voltage_, max_voltage_);
     
-    // Calculate back EMF
-    double back_emf = back_emf_constant_ * angular_velocity_;
-    
-    // Calculate current using simplified electrical model
-    // I = (V - back_emf) / R (ignoring inductance for simplicity)
-    current_ = (voltage_ - back_emf) / resistance_;
+    // Simplified current calculation - just based on voltage and resistance
+    // No back-EMF consideration
+    current_ = voltage_ / resistance_;
     
     // Clamp current to limits
     current_ = std::clamp(current_, -max_current_, max_current_);
@@ -37,6 +38,14 @@ void Motor::update(double dt, double load_torque) {
     // Update angular velocity and position using Euler integration
     angular_velocity_ += angular_acceleration * dt;
     angular_position_ += angular_velocity_ * dt;
+    
+    // Apply maximum angular velocity limit
+    angular_velocity_ = std::clamp(angular_velocity_, -max_angular_velocity_, max_angular_velocity_);
+    
+    // Stop motor completely when voltage is 0
+    if (voltage_ == 0.0) {
+        angular_velocity_ = 0.0;
+    }
 }
 
 void Motor::setVoltage(double voltage) {
@@ -70,4 +79,12 @@ void Motor::reset() {
     torque_ = 0.0;
     angular_velocity_ = 0.0;
     angular_position_ = 0.0;
+}
+
+double Motor::getMaxAngularVelocity() const {
+    return max_angular_velocity_;
+}
+
+void Motor::setMaxAngularVelocity(double max_velocity_rpm) {
+    max_angular_velocity_ = max_velocity_rpm * (2.0 * M_PI / 60.0);
 }

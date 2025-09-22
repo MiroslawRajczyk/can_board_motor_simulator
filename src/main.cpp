@@ -4,145 +4,202 @@
 #include <chrono>
 #include <thread>
 #include <cmath>
+#include <string>
+#include <sstream>
+#include <atomic>
 
-void printMotorState(const MotorController& controller, double time) {
-    const Motor& motor = controller.getMotor();
-    const Encoder& encoder = controller.getEncoder();
+class MotorService {
+private:
+    MotorController controller_;
+    std::atomic<bool> running_;
+    std::chrono::steady_clock::time_point last_update_;
+    const double dt_ = 0.001; // 1ms update cycle (1kHz) - temporarily reduced for debugging
     
-    std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Time: " << std::setw(6) << time << "s | ";
-    std::cout << "Pos: " << std::setw(7) << encoder.getPositionRadians() << " rad | ";
-    std::cout << "Vel: " << std::setw(7) << encoder.getVelocity() << " rad/s | ";
-    std::cout << "Voltage: " << std::setw(6) << motor.getVoltage() << "V | ";
-    std::cout << "Current: " << std::setw(6) << motor.getCurrent() << "A | ";
-    std::cout << "Torque: " << std::setw(6) << motor.getTorque() << " Nm | ";
-    std::cout << "Error: " << std::setw(7) << controller.getCurrentError() << std::endl;
-}
-
-void demonstrateOpenLoop(MotorController& controller) {
-    std::cout << "\n=== Open Loop Control Demo ===" << std::endl;
-    std::cout << "Applying 6V for 2 seconds" << std::endl;
-    
-    controller.reset();
-    controller.setVoltage(6.0);
-    
-    double dt = 0.01;  // 10ms timestep
-    double time = 0.0;
-    
-    while (time < 2.0) {
-        controller.update(dt);
-        
-        if (static_cast<int>(time * 100) % 20 == 0) {  // Print every 200ms
-            printMotorState(controller, time);
-        }
-        
-        time += dt;
+public:
+    MotorService() : running_(false) {
+        // Set default PID gains
+        controller_.setPIDGains(5.0, 0.5, 0.1);
     }
-}
-
-void demonstratePositionControl(MotorController& controller) {
-    std::cout << "\n=== Position Control Demo ===" << std::endl;
-    std::cout << "Moving to position 3.14 radians (180 degrees)" << std::endl;
     
-    controller.reset();
-    controller.setPIDGains(5.0, 0.5, 0.1);  // Tune PID gains
-    controller.setPosition(M_PI);  // 180 degrees
-    
-    double dt = 0.01;
-    double time = 0.0;
-    
-    while (time < 3.0) {
-        controller.update(dt);
+    void start() {
+        running_ = true;
+        last_update_ = std::chrono::steady_clock::now();
         
-        if (static_cast<int>(time * 100) % 20 == 0) {
-            printMotorState(controller, time);
-        }
-        
-        time += dt;
+        std::cout << "Motor Service Started" << std::endl;
+        std::cout << "Motor ID: 1" << std::endl;
+        std::cout << "Status: IDLE - Ready to receive commands" << std::endl;
+        std::cout << "Simulation frequency: 10kHz (0.1ms time step)" << std::endl;
+        printMotorInfo();
+        std::cout << "\nAvailable commands:" << std::endl;
+        std::cout << "  voltage <value>    - Set voltage (open loop)" << std::endl;
+        std::cout << "  position <value>   - Move to position (radians)" << std::endl;
+        std::cout << "  velocity <value>   - Set velocity (rad/s)" << std::endl;
+        std::cout << "  stop               - Stop motor" << std::endl;
+        std::cout << "  status             - Show current status" << std::endl;
+        std::cout << "  quit               - Exit service" << std::endl;
+        std::cout << "\nType 'help' for commands list" << std::endl;
+        std::cout << "motor> ";
+        std::cout.flush();
     }
-}
-
-void demonstrateVelocityControl(MotorController& controller) {
-    std::cout << "\n=== Velocity Control Demo ===" << std::endl;
-    std::cout << "Setting velocity to 10 rad/s" << std::endl;
     
-    controller.reset();
-    controller.setPIDGains(0.5, 0.1, 0.01);  // Different gains for velocity control
-    controller.setVelocity(10.0);
-    
-    double dt = 0.01;
-    double time = 0.0;
-    
-    while (time < 3.0) {
-        controller.update(dt);
-        
-        if (static_cast<int>(time * 100) % 20 == 0) {
-            printMotorState(controller, time);
-        }
-        
-        time += dt;
+    void stop() {
+        running_ = false;
+        controller_.stop();
     }
-}
-
-void demonstrateWithLoad(MotorController& controller) {
-    std::cout << "\n=== Position Control with Load Disturbance ===" << std::endl;
-    std::cout << "Moving to 1.57 rad with 0.01 Nm load applied at t=1s" << std::endl;
     
-    controller.reset();
-    controller.setPIDGains(5.0, 0.5, 0.1);
-    controller.setPosition(M_PI/2);  // 90 degrees
-    
-    double dt = 0.01;
-    double time = 0.0;
-    double load_torque = 0.0;
-    
-    while (time < 4.0) {
-        // Apply load disturbance after 1 second
-        if (time > 1.0) {
-            load_torque = 0.01;  // 0.01 Nm load
+    void update() {
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update_);
+        
+        if (elapsed.count() >= 1000) { // 1ms update cycle (1000 microseconds)
+            controller_.update(dt_);
+            last_update_ = now;
         }
+    }
+    
+    bool isRunning() const {
+        return running_;
+    }
+    
+    // Run the simulation loop - designed to be called from a separate thread
+    void simulationLoop() {
+        while (running_) {
+            update();
+            std::this_thread::sleep_for(std::chrono::microseconds(100)); // 0.1ms sleep
+        }
+    }
+
+    void processCommand(const std::string& command) {
+        if (command.empty()) return;
         
-        controller.update(dt, load_torque);
+        std::istringstream iss(command);
+        std::string cmd;
+        iss >> cmd;
         
-        if (static_cast<int>(time * 100) % 20 == 0) {
-            printMotorState(controller, time);
-            if (time > 1.0 && time < 1.2) {
-                std::cout << "  <- Load applied!" << std::endl;
+        if (cmd == "voltage") {
+            double voltage;
+            if (iss >> voltage) {
+                controller_.setVoltage(voltage);
+                std::cout << "Set voltage to " << voltage << "V (open loop mode)" << std::endl;
+            } else {
+                std::cout << "Usage: voltage <value>" << std::endl;
             }
         }
+        else if (cmd == "position") {
+            double position;
+            if (iss >> position) {
+                controller_.setPosition(position);
+                std::cout << "Moving to position " << position << " radians" << std::endl;
+            } else {
+                std::cout << "Usage: position <value>" << std::endl;
+            }
+        }
+        else if (cmd == "velocity") {
+            double velocity;
+            if (iss >> velocity) {
+                controller_.setVelocity(velocity);
+                std::cout << "Setting velocity to " << velocity << " rad/s" << std::endl;
+            } else {
+                std::cout << "Usage: velocity <value>" << std::endl;
+            }
+        }
+        else if (cmd == "stop") {
+            controller_.stop();
+            std::cout << "Motor stopped" << std::endl;
+        }
+        else if (cmd == "status") {
+            printStatus();
+        }
+        else if (cmd == "help") {
+            printHelp();
+        }
+        else if (cmd == "quit" || cmd == "exit") {
+            running_ = false;
+            std::cout << "Shutting down motor service..." << std::endl;
+            return;
+        }
+        else {
+            std::cout << "Unknown command: " << cmd << std::endl;
+            std::cout << "Type 'help' for available commands" << std::endl;
+        }
         
-        time += dt;
+        std::cout << "motor> ";
+        std::cout.flush();
     }
-}
+    
+private:
+    void printMotorInfo() {
+        const Motor& motor = controller_.getMotor();
+        std::cout << "\nMotor Parameters:" << std::endl;
+        std::cout << "  Resistance: " << motor.getResistance() << " Ohms" << std::endl;
+        std::cout << "  Inductance: " << motor.getInductance() << " H" << std::endl;
+        std::cout << "  Back EMF Constant: " << motor.getBackEmfConstant() << " V*s/rad" << std::endl;
+        std::cout << "  Torque Constant: " << motor.getTorqueConstant() << " Nm/A" << std::endl;
+        std::cout << "  Inertia: " << motor.getInertia() << " kg*m^2" << std::endl;
+        std::cout << "  Friction: " << motor.getFriction() << " Nm*s/rad" << std::endl;
+        std::cout << "  Max Angular Velocity: " << (motor.getMaxAngularVelocity() * 60.0 / (2.0 * M_PI)) 
+                  << " RPM (" << motor.getMaxAngularVelocity() << " rad/s)" << std::endl;
+    }
+    
+    void printStatus() {
+        const Motor& motor = controller_.getMotor();
+        const Encoder& encoder = controller_.getEncoder();
+        
+        std::cout << std::fixed << std::setprecision(3);
+        std::cout << "\n=== Motor Status ===" << std::endl;
+        std::cout << "Mode: " << controller_.getControlModeString() << std::endl;
+        std::cout << "Running: " << (controller_.isRunning() ? "YES" : "NO") << std::endl;
+        std::cout << "Position: " << encoder.getPositionRadians() << " rad (" 
+                  << (encoder.getPositionRadians() * 180.0 / M_PI) << "°)" << std::endl;
+        std::cout << "Velocity: " << encoder.getVelocity() << " rad/s" << std::endl;
+        std::cout << "Voltage: " << motor.getVoltage() << " V" << std::endl;
+        std::cout << "Current: " << motor.getCurrent() << " A" << std::endl;
+        std::cout << "Torque: " << motor.getTorque() << " Nm" << std::endl;
+        
+        if (controller_.getControlModeString() != "IDLE" && controller_.getControlModeString() != "OPEN_LOOP") {
+            std::cout << "Setpoint: " << controller_.getSetpoint() << std::endl;
+            std::cout << "Error: " << controller_.getCurrentError() << std::endl;
+        }
+        std::cout << "===================" << std::endl;
+    }
+    
+    void printHelp() {
+        std::cout << "\nAvailable commands:" << std::endl;
+        std::cout << "  voltage <value>    - Set motor voltage directly (V)" << std::endl;
+        std::cout << "  position <value>   - Move to position in radians" << std::endl;
+        std::cout << "  velocity <value>   - Set target velocity in rad/s" << std::endl;
+        std::cout << "  stop               - Stop motor and set to idle" << std::endl;
+        std::cout << "  status             - Show detailed motor status" << std::endl;
+        std::cout << "  help               - Show this help message" << std::endl;
+        std::cout << "  quit/exit          - Exit the motor service" << std::endl;
+        std::cout << "\nExamples:" << std::endl;
+        std::cout << "  voltage 6.0        - Apply 6V to motor" << std::endl;
+        std::cout << "  position 3.14159   - Move to π radians (180°)" << std::endl;
+        std::cout << "  velocity 10        - Spin at 10 rad/s" << std::endl;
+    }
+};
 
 int main() {
-    std::cout << "Motor and Encoder Simulator" << std::endl;
+    std::cout << "CAN Motor Simulator Service" << std::endl;
     std::cout << "===========================" << std::endl;
+    std::cout << "Simulation frequency: 1kHz (1ms time step)" << std::endl;
     
-    MotorController controller;
+    MotorService service;
+    service.start();
     
-    // Display motor parameters
-    const Motor& motor = controller.getMotor();
-    std::cout << "\nMotor Parameters:" << std::endl;
-    std::cout << "Resistance: " << motor.getResistance() << " Ohms" << std::endl;
-    std::cout << "Inductance: " << motor.getInductance() << " H" << std::endl;
-    std::cout << "Back EMF Constant: " << motor.getBackEmfConstant() << " V*s/rad" << std::endl;
-    std::cout << "Torque Constant: " << motor.getTorqueConstant() << " Nm/A" << std::endl;
-    std::cout << "Inertia: " << motor.getInertia() << " kg*m^2" << std::endl;
-    std::cout << "Friction: " << motor.getFriction() << " Nm*s/rad" << std::endl;
+    // Start the simulation loop in a separate thread
+    std::thread simulationThread(&MotorService::simulationLoop, &service);
     
-    // Run demonstrations
-    demonstrateOpenLoop(controller);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // Main service loop - process user commands
+    std::string command;
+    while (service.isRunning() && std::getline(std::cin, command)) {
+        service.processCommand(command);
+    }
     
-    demonstratePositionControl(controller);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // Stop the service and wait for the simulation thread to finish
+    service.stop();
+    simulationThread.join();
     
-    demonstrateVelocityControl(controller);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    
-    demonstrateWithLoad(controller);
-    
-    std::cout << "\nSimulation complete!" << std::endl;
+    std::cout << "Motor service stopped." << std::endl;
     return 0;
 }

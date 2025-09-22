@@ -18,11 +18,13 @@ private:
     
     double max_voltage_;      // Maximum voltage limit
     double max_current_;      // Maximum current limit
+    double max_angular_velocity_; // Maximum angular velocity (rad/s)
 
 public:
     Motor(double resistance = 1.0, double inductance = 0.001, 
           double back_emf_constant = 0.01, double torque_constant = 0.01,
-          double inertia = 0.0001, double friction = 0.0001);
+          double inertia = 0.0001, double friction = 0.0001,
+          double max_angular_velocity_rpm = 60.0); // 60 RPM default
     
     // Update motor physics simulation
     void update(double dt, double load_torque = 0.0);
@@ -48,6 +50,10 @@ public:
     // Set motor limits
     void setMaxVoltage(double max_voltage);
     void setMaxCurrent(double max_current);
+    
+    // Get/Set maximum angular velocity
+    double getMaxAngularVelocity() const;
+    void setMaxAngularVelocity(double max_velocity_rpm);
     
     // Reset motor state
     void reset();

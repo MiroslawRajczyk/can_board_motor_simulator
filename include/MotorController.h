@@ -1,6 +1,7 @@
 #pragma once
 #include "Motor.h"
 #include "Encoder.h"
+#include <string>
 
 class MotorController {
 private:
@@ -14,12 +15,15 @@ private:
     double setpoint_;
     
     // Control mode
-    enum ControlMode { OPEN_LOOP, POSITION_CONTROL, VELOCITY_CONTROL };
+    enum ControlMode { OPEN_LOOP, POSITION_CONTROL, VELOCITY_CONTROL, IDLE };
     ControlMode control_mode_;
     
     // Limits
     double max_voltage_;
     double max_velocity_;
+    
+    // Motor running state
+    bool is_running_;
 
 public:
     MotorController();
@@ -31,6 +35,7 @@ public:
     void setVoltage(double voltage);  // Open loop control
     void setPosition(double position_radians);  // Position control
     void setVelocity(double velocity_rad_s);    // Velocity control
+    void stop();  // Stop motor and set to idle
     
     // PID tuning
     void setPIDGains(double kp, double ki, double kd);
@@ -42,6 +47,12 @@ public:
     // Get current setpoint and error
     double getSetpoint() const;
     double getCurrentError() const;
+    
+    // Get current control mode as string
+    std::string getControlModeString() const;
+    
+    // Check if motor is running
+    bool isRunning() const;
     
     // Reset controller
     void reset();
