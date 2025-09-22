@@ -1,21 +1,26 @@
 #pragma once
+#include <cmath>
 
 class Encoder {
 private:
-    long position_;           // Current encoder position (ticks)
-    double resolution_;       // Pulses per revolution
-    double velocity_;         // Angular velocity in rad/s
-    double last_position_;    // Previous position for velocity calculation
-    double last_time_;        // Previous time for velocity calculation
+    long position_steps_;     // Current encoder position in steps
+    int bit_resolution_;      // Encoder bit resolution (e.g., 12 bits)
+    long max_steps_;          // Maximum steps per revolution (2^bit_resolution)
+    double angular_velocity_; // Angular velocity in rad/s
+    bool direction_inverted_; // Encoder direction: false = normal, true = inverted
+
+    // Conversion helpers
+    double stepsToRadians(long steps) const;
+    long radiansToSteps(double radians) const;
 
 public:
-    Encoder(double resolution = 1000.0);
+    Encoder(int bit_resolution = 12, bool direction_inverted = false);
     
     // Update encoder position based on motor rotation
     void update(double angular_velocity, double dt);
     
-    // Get current position in ticks
-    long getPosition() const;
+    // Get current position in steps
+    long getPositionSteps() const;
     
     // Get current position in radians
     double getPositionRadians() const;
@@ -26,6 +31,9 @@ public:
     // Reset encoder position to zero
     void reset();
     
-    // Set resolution (pulses per revolution)
-    void setResolution(double resolution);
+    // Get encoder specifications
+    int getBitResolution() const;
+    long getMaxSteps() const;
+    double getResolutionRadians() const; // Resolution in radians per step
+    bool isDirectionInverted() const;
 };

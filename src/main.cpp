@@ -13,7 +13,7 @@ private:
     MotorController controller_;
     std::atomic<bool> running_;
     std::chrono::steady_clock::time_point last_update_;
-    const double dt_ = 0.001; // 1ms update cycle (1kHz) - temporarily reduced for debugging
+    const double dt_ = 0.001; // 1ms update cycle (1kHz)
     
 public:
     MotorService() : running_(false) {
@@ -28,7 +28,7 @@ public:
         std::cout << "Motor Service Started" << std::endl;
         std::cout << "Motor ID: 1" << std::endl;
         std::cout << "Status: IDLE - Ready to receive commands" << std::endl;
-        std::cout << "Simulation frequency: 10kHz (0.1ms time step)" << std::endl;
+        std::cout << "Simulation frequency: 1kHz (1ms time step)" << std::endl;
         printMotorInfo();
         std::cout << "\nAvailable commands:" << std::endl;
         std::cout << "  voltage <value>    - Set voltage (open loop)" << std::endl;
@@ -51,7 +51,7 @@ public:
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update_);
         
-        if (elapsed.count() >= 1000) { // 1ms update cycle (1000 microseconds)
+        if (elapsed.count() >= 1000) { // 1ms update cycle (100 microseconds)
             controller_.update(dt_);
             last_update_ = now;
         }
@@ -130,6 +130,8 @@ public:
 private:
     void printMotorInfo() {
         const Motor& motor = controller_.getMotor();
+        const Encoder& encoder = controller_.getEncoder();
+
         std::cout << "\nMotor Parameters:" << std::endl;
         std::cout << "  Resistance: " << motor.getResistance() << " Ohms" << std::endl;
         std::cout << "  Inductance: " << motor.getInductance() << " H" << std::endl;
@@ -139,17 +141,28 @@ private:
         std::cout << "  Friction: " << motor.getFriction() << " Nm*s/rad" << std::endl;
         std::cout << "  Max Angular Velocity: " << (motor.getMaxAngularVelocity() * 60.0 / (2.0 * M_PI)) 
                   << " RPM (" << motor.getMaxAngularVelocity() << " rad/s)" << std::endl;
+        
+        std::cout << "\nEncoder Parameters:" << std::endl;
+        std::cout << "  Type: Absolute Encoder" << std::endl;
+        std::cout << "  Bit Resolution: " << encoder.getBitResolution() << " bits" << std::endl;
+        std::cout << "  Steps per Revolution: " << encoder.getMaxSteps() << " steps" << std::endl;
+        std::cout << "  Resolution: " << (encoder.getResolutionRadians() * 180.0 / M_PI) 
+                  << " degrees/step (" << encoder.getResolutionRadians() << " rad/step)" << std::endl;
+        std::cout << "  Direction: " << (encoder.isDirectionInverted() ? "INVERTED" : "NORMAL") 
+                  << " (positive voltage " << (encoder.isDirectionInverted() ? "decreases" : "increases") 
+                  << " encoder value)" << std::endl;
     }
     
     void printStatus() {
         const Motor& motor = controller_.getMotor();
         const Encoder& encoder = controller_.getEncoder();
-        
+
         std::cout << std::fixed << std::setprecision(3);
         std::cout << "\n=== Motor Status ===" << std::endl;
         std::cout << "Mode: " << controller_.getControlModeString() << std::endl;
         std::cout << "Running: " << (controller_.isRunning() ? "YES" : "NO") << std::endl;
-        std::cout << "Position: " << encoder.getPositionRadians() << " rad (" 
+        std::cout << "Position: " << encoder.getPositionSteps() << " steps (" 
+                  << encoder.getPositionRadians() << " rad, " 
                   << (encoder.getPositionRadians() * 180.0 / M_PI) << "°)" << std::endl;
         std::cout << "Velocity: " << encoder.getVelocity() << " rad/s" << std::endl;
         std::cout << "Voltage: " << motor.getVoltage() << " V" << std::endl;
