@@ -18,33 +18,38 @@ void Motor::update(double dt, double load_torque) {
     // Clamp voltage to limits
     voltage_ = std::clamp(voltage_, -max_voltage_, max_voltage_);
     
-    // Simplified current calculation - just based on voltage and resistance
-    // No back-EMF consideration
-    current_ = voltage_ / resistance_;
+    // Calculate target steady-state velocity based on voltage
+    // At max voltage (12V), we should reach max angular velocity
+    double target_velocity = (voltage_ / max_voltage_) * max_angular_velocity_;
     
-    // Clamp current to limits
-    current_ = std::clamp(current_, -max_current_, max_current_);
+    // Simple velocity control - move towards target velocity
+    double velocity_error = target_velocity - angular_velocity_;
     
-    // Calculate motor torque
-    torque_ = torque_constant_ * current_;
+    // Use a velocity time constant to control how fast we reach target velocity
+    double velocity_time_constant = 0.2; // 200ms time constant for smooth acceleration
+    double velocity_change = (velocity_error / velocity_time_constant) * dt;
     
-    // Calculate net torque (motor torque - friction - load)
-    double friction_torque = friction_ * angular_velocity_;
-    double net_torque = torque_ - friction_torque - load_torque;
+    // Update angular velocity
+    angular_velocity_ += velocity_change;
     
-    // Update angular acceleration using Newton's law for rotation
-    double angular_acceleration = net_torque / inertia_;
+    // Apply maximum angular velocity limit (should not be needed now but keep as safety)
+    angular_velocity_ = std::clamp(angular_velocity_, -max_angular_velocity_, max_angular_velocity_);
     
-    // Update angular velocity and position using Euler integration
-    angular_velocity_ += angular_acceleration * dt;
+    // Update position
     angular_position_ += angular_velocity_ * dt;
     
-    // Apply maximum angular velocity limit
-    angular_velocity_ = std::clamp(angular_velocity_, -max_angular_velocity_, max_angular_velocity_);
+    // Calculate realistic current and torque based on the velocity control effort
+    // Higher velocity error means more current needed
+    double normalized_effort = std::abs(velocity_error) / max_angular_velocity_;
+    current_ = normalized_effort * (voltage_ / resistance_);
+    current_ = std::clamp(current_, -max_current_, max_current_);
+    torque_ = torque_constant_ * current_;
     
     // Stop motor completely when voltage is 0
     if (voltage_ == 0.0) {
         angular_velocity_ = 0.0;
+        current_ = 0.0;
+        torque_ = 0.0;
     }
 }
 
