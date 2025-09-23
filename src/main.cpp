@@ -13,11 +13,10 @@ private:
     MotorController controller_;
     std::atomic<bool> running_;
     std::chrono::steady_clock::time_point last_update_;
-    const double dt_ = 0.0001; // 1ms update cycle (1kHz)
+    const double dt_ = 0.0001; // 0,1ms update cycle (10kHz)
     
 public:
     MotorService() : running_(false) {
-        // Set default PID gains
         controller_.setPIDGains(5.0, 0.5, 0.1);
     }
     
@@ -40,7 +39,7 @@ public:
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update_);
         
-        if (elapsed.count() >= 100) { // 0.1ms update cycle (100 microseconds)
+        if (elapsed.count() >= 100) { // 0.1ms update cycle (100 microseconds) for 10kHz
             controller_.update(dt_);
             last_update_ = now;
         }
@@ -50,11 +49,10 @@ public:
         return running_;
     }
     
-    // Run the simulation loop - designed to be called from a separate thread
     void simulationLoop() {
         while (running_) {
             update();
-            std::this_thread::sleep_for(std::chrono::microseconds(100)); // 0.1ms sleep
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
     }
 
