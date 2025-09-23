@@ -2,26 +2,26 @@
 
 class Motor {
 private:
-    double voltage_;          // Applied voltage (V)
+    int control_signal_;      // Control signal (-1000 to +1000)
     double current_;          // Motor current (A) - simplified calculation
     double torque_;           // Output torque (Nm) - simplified calculation
     double angular_velocity_; // Angular velocity (rad/s)
     double angular_position_; // Angular position (rad)
     
-    double max_voltage_;      // Maximum voltage limit
-    double max_angular_velocity_; // Maximum angular velocity (rad/s)
+    int max_control_signal_;         // Maximum control signal (1000)
+    double max_angular_velocity_;    // Maximum angular velocity (rad/s)
 
 public:
-    Motor(double max_angular_velocity_rpm = 60.0, double max_voltage = 12.0);
+    Motor(double max_angular_velocity_rpm = 60.0, int max_control_signal = 1000);
     
     // Update motor physics simulation
     void update(double dt, double load_torque = 0.0);
     
-    // Set applied voltage
-    void setVoltage(double voltage);
+    // Set control signal
+    void setControlSignal(int control_signal);
     
     // Get motor state
-    double getVoltage() const;
+    int getControlSignal() const;
     double getCurrent() const;
     double getTorque() const;
     double getAngularVelocity() const;
@@ -29,10 +29,10 @@ public:
     
     // Get motor parameters
     double getMaxAngularVelocity() const;
-    double getMaxVoltage() const;
+    int getMaxControlSignal() const;
     
     // Set motor limits
-    void setMaxVoltage(double max_voltage);
+    void setMaxControlSignal(int max_control_signal);
     void setMaxAngularVelocity(double max_velocity_rpm);
     
     // Reset motor state

@@ -15,14 +15,14 @@ void MotorController::update(double dt, double load_torque) {
     
     switch (control_mode_) {
         case IDLE:
-            // Motor is idle, no voltage applied
-            motor_.setVoltage(0.0);
+            // Motor is idle, no control signal applied
+            motor_.setControlSignal(0);
             is_running_ = false;
             break;
             
         case OPEN_LOOP:
-            // Voltage is already set, no feedback control
-            is_running_ = (motor_.getVoltage() != 0.0);
+            // Control signal is already set, no feedback control
+            is_running_ = (motor_.getControlSignal() != 0);
             break;
             
         case POSITION_CONTROL: {
@@ -34,9 +34,10 @@ void MotorController::update(double dt, double load_torque) {
             double derivative_error = (error - previous_error_) / dt;
             
             control_output = kp_ * error + ki_ * integral_error_ + kd_ * derivative_error;
-            control_output = std::clamp(control_output, -max_voltage_, max_voltage_);
+            // Clamp to control signal range (-1000 to +1000)
+            control_output = std::clamp(control_output, -1000.0, 1000.0);
             
-            motor_.setVoltage(control_output);
+            motor_.setControlSignal(static_cast<int>(control_output));
             previous_error_ = error;
             is_running_ = true;
             break;
@@ -51,9 +52,10 @@ void MotorController::update(double dt, double load_torque) {
             double derivative_error = (error - previous_error_) / dt;
             
             control_output = kp_ * error + ki_ * integral_error_ + kd_ * derivative_error;
-            control_output = std::clamp(control_output, -max_voltage_, max_voltage_);
+            // Clamp to control signal range (-1000 to +1000)
+            control_output = std::clamp(control_output, -1000.0, 1000.0);
             
-            motor_.setVoltage(control_output);
+            motor_.setControlSignal(static_cast<int>(control_output));
             previous_error_ = error;
             is_running_ = true;
             break;
@@ -67,12 +69,12 @@ void MotorController::update(double dt, double load_torque) {
     encoder_.update(motor_.getAngularVelocity(), dt);
 }
 
-void MotorController::setVoltage(double voltage) {
+void MotorController::setControlSignal(int control_signal) {
     control_mode_ = OPEN_LOOP;
-    motor_.setVoltage(voltage);
+    motor_.setControlSignal(control_signal);
     integral_error_ = 0.0;
     previous_error_ = 0.0;
-    is_running_ = (voltage != 0.0);
+    is_running_ = (control_signal != 0);
 }
 
 void MotorController::setPosition(double position_radians) {
@@ -93,7 +95,7 @@ void MotorController::setVelocity(double velocity_rad_s) {
 
 void MotorController::stop() {
     control_mode_ = IDLE;
-    motor_.setVoltage(0.0);
+    motor_.setControlSignal(0);
     integral_error_ = 0.0;
     previous_error_ = 0.0;
     setpoint_ = 0.0;

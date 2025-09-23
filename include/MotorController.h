@@ -32,7 +32,7 @@ public:
     void update(double dt, double load_torque = 0.0);
     
     // Control methods
-    void setVoltage(double voltage);  // Open loop control
+    void setControlSignal(int control_signal);  // Open loop control
     void setPosition(double position_radians);  // Position control
     void setVelocity(double velocity_rad_s);    // Velocity control
     void stop();  // Stop motor and set to idle

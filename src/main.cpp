@@ -63,13 +63,13 @@ public:
         std::string cmd;
         iss >> cmd;
         
-        if (cmd == "voltage") {
-            double voltage;
-            if (iss >> voltage) {
-                controller_.setVoltage(voltage);
-                std::cout << "Set voltage to " << voltage << "V (open loop mode)" << std::endl;
+        if (cmd == "control") {
+            int control_signal;
+            if (iss >> control_signal) {
+                controller_.setControlSignal(control_signal);
+                std::cout << "Set control signal to " << control_signal << " (open loop mode)" << std::endl;
             } else {
-                std::cout << "Usage: voltage <value>" << std::endl;
+                std::cout << "Usage: control <value> (range: -1000 to +1000)" << std::endl;
             }
         }
         else if (cmd == "position") {
@@ -120,7 +120,8 @@ private:
         const Encoder& encoder = controller_.getEncoder();
 
         std::cout << "\nMotor Parameters:" << std::endl;
-        std::cout << "  Max Voltage: " << motor.getMaxVoltage() << " V" << std::endl;
+        std::cout << "  Max Control Signal: " << motor.getMaxControlSignal() << " (range: -" 
+                  << motor.getMaxControlSignal() << " to +" << motor.getMaxControlSignal() << ")" << std::endl;
         std::cout << "  Max Angular Velocity: " << (motor.getMaxAngularVelocity() * 60.0 / (2.0 * M_PI)) 
                   << " RPM (" << motor.getMaxAngularVelocity() << " rad/s)" << std::endl;
         
@@ -131,7 +132,7 @@ private:
         std::cout << "  Resolution: " << (encoder.getResolutionRadians() * 180.0 / M_PI) 
                   << " degrees/step (" << encoder.getResolutionRadians() << " rad/step)" << std::endl;
         std::cout << "  Direction: " << (encoder.isDirectionInverted() ? "INVERTED" : "NORMAL") 
-                  << " (positive voltage " << (encoder.isDirectionInverted() ? "decreases" : "increases") 
+                  << " (positive control signal " << (encoder.isDirectionInverted() ? "decreases" : "increases") 
                   << " encoder value)" << std::endl;
     }
     
@@ -147,7 +148,7 @@ private:
                   << encoder.getPositionRadians() << " rad, " 
                   << (encoder.getPositionRadians() * 180.0 / M_PI) << "°)" << std::endl;
         std::cout << "Velocity: " << encoder.getVelocity() << " rad/s" << std::endl;
-        std::cout << "Voltage: " << motor.getVoltage() << " V" << std::endl;
+        std::cout << "Control Signal: " << motor.getControlSignal() << std::endl;
         std::cout << "Current: " << motor.getCurrent() << " A" << std::endl;
         std::cout << "Torque: " << motor.getTorque() << " Nm" << std::endl;
         
@@ -160,7 +161,7 @@ private:
     
     void printHelp() {
         std::cout << "\nAvailable commands:" << std::endl;
-        std::cout << "  voltage <value>    - Set motor voltage directly (V)" << std::endl;
+        std::cout << "  control <value>    - Set control signal directly (range: -1000 to +1000)" << std::endl;
         std::cout << "  position <value>   - Move to position in radians" << std::endl;
         std::cout << "  velocity <value>   - Set target velocity in rad/s" << std::endl;
         std::cout << "  stop               - Stop motor and set to idle" << std::endl;
@@ -168,7 +169,7 @@ private:
         std::cout << "  help               - Show this help message" << std::endl;
         std::cout << "  quit/exit          - Exit the motor service" << std::endl;
         std::cout << "\nExamples:" << std::endl;
-        std::cout << "  voltage 6.0        - Apply 6V to motor" << std::endl;
+        std::cout << "  control 500        - Apply control signal of 500" << std::endl;
         std::cout << "  position 3.14159   - Move to π radians (180°)" << std::endl;
         std::cout << "  velocity 10        - Spin at 10 rad/s" << std::endl;
     }
