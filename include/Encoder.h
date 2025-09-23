@@ -15,7 +15,7 @@ private:
     long radiansToSteps(double radians) const;
 
 public:
-    Encoder(int bit_resolution = 12, bool direction_inverted = false);
+    Encoder(int bit_resolution = 18, bool direction_inverted = false);
     
     // Update encoder position based on motor rotation
     void update(double angular_velocity, double dt);

@@ -13,7 +13,7 @@ private:
     MotorController controller_;
     std::atomic<bool> running_;
     std::chrono::steady_clock::time_point last_update_;
-    const double dt_ = 0.001; // 1ms update cycle (1kHz)
+    const double dt_ = 0.0001; // 1ms update cycle (1kHz)
     
 public:
     MotorService() : running_(false) {
@@ -25,19 +25,8 @@ public:
         running_ = true;
         last_update_ = std::chrono::steady_clock::now();
         
-        std::cout << "Motor Service Started" << std::endl;
-        std::cout << "Motor ID: 1" << std::endl;
-        std::cout << "Status: IDLE - Ready to receive commands" << std::endl;
-        std::cout << "Simulation frequency: 1kHz (1ms time step)" << std::endl;
         printMotorInfo();
-        std::cout << "\nAvailable commands:" << std::endl;
-        std::cout << "  voltage <value>    - Set voltage (open loop)" << std::endl;
-        std::cout << "  position <value>   - Move to position (radians)" << std::endl;
-        std::cout << "  velocity <value>   - Set velocity (rad/s)" << std::endl;
-        std::cout << "  stop               - Stop motor" << std::endl;
-        std::cout << "  status             - Show current status" << std::endl;
-        std::cout << "  quit               - Exit service" << std::endl;
-        std::cout << "\nType 'help' for commands list" << std::endl;
+        printHelp();
         std::cout << "motor> ";
         std::cout.flush();
     }
@@ -51,7 +40,7 @@ public:
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update_);
         
-        if (elapsed.count() >= 1000) { // 1ms update cycle (100 microseconds)
+        if (elapsed.count() >= 100) { // 0.1ms update cycle (100 microseconds)
             controller_.update(dt_);
             last_update_ = now;
         }
@@ -188,9 +177,10 @@ private:
 };
 
 int main() {
-    std::cout << "CAN Motor Simulator Service" << std::endl;
-    std::cout << "===========================" << std::endl;
-    std::cout << "Simulation frequency: 1kHz (1ms time step)" << std::endl;
+    std::cout << "=======================" << std::endl;
+    std::cout << "= CAN Motor Simulator =" << std::endl;
+    std::cout << "=======================" << std::endl;
+    std::cout << "Simulation frequency:: 10kHz" << std::endl;
     
     MotorService service;
     service.start();
