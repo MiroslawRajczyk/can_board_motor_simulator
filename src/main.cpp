@@ -133,12 +133,7 @@ private:
         const Encoder& encoder = controller_.getEncoder();
 
         std::cout << "\nMotor Parameters:" << std::endl;
-        std::cout << "  Resistance: " << motor.getResistance() << " Ohms" << std::endl;
-        std::cout << "  Inductance: " << motor.getInductance() << " H" << std::endl;
-        std::cout << "  Back EMF Constant: " << motor.getBackEmfConstant() << " V*s/rad" << std::endl;
-        std::cout << "  Torque Constant: " << motor.getTorqueConstant() << " Nm/A" << std::endl;
-        std::cout << "  Inertia: " << motor.getInertia() << " kg*m^2" << std::endl;
-        std::cout << "  Friction: " << motor.getFriction() << " Nm*s/rad" << std::endl;
+        std::cout << "  Max Voltage: " << motor.getMaxVoltage() << " V" << std::endl;
         std::cout << "  Max Angular Velocity: " << (motor.getMaxAngularVelocity() * 60.0 / (2.0 * M_PI)) 
                   << " RPM (" << motor.getMaxAngularVelocity() << " rad/s)" << std::endl;
         
