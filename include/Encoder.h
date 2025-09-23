@@ -4,6 +4,7 @@
 class Encoder {
 private:
     long position_steps_;     // Current encoder position in steps
+    double fractional_steps_; // Accumulated fractional steps
     int bit_resolution_;      // Encoder bit resolution (e.g., 12 bits)
     long max_steps_;          // Maximum steps per revolution (2^bit_resolution)
     double angular_velocity_; // Angular velocity in rad/s

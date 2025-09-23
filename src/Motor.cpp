@@ -39,9 +39,10 @@ void Motor::update(double dt, double load_torque) {
     angular_position_ += angular_velocity_ * dt;
     
     // Calculate realistic current and torque based on the velocity control effort
-    // Higher velocity error means more current needed
+    // For negative voltages, current should also be negative
     double normalized_effort = std::abs(velocity_error) / max_angular_velocity_;
-    current_ = normalized_effort * (voltage_ / resistance_);
+    double effort_direction = (velocity_error >= 0) ? 1.0 : -1.0;
+    current_ = normalized_effort * effort_direction * (std::abs(voltage_) / resistance_);
     current_ = std::clamp(current_, -max_current_, max_current_);
     torque_ = torque_constant_ * current_;
     
