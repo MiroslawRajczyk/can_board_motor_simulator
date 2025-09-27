@@ -1,19 +1,19 @@
 #ifndef TERMINAL_UI_H
 #define TERMINAL_UI_H
 
-#include "MotorController.h"
+#include "Motor.h"
+#include "Encoder.h"
 #include <string>
 #include <atomic>
 
 class TerminalUI {
 private:
-    MotorController& controller_;
+    Motor& motor_;
+    Encoder& encoder_;
     std::atomic<bool>& running_;
 
 public:
-    TerminalUI(MotorController& controller, std::atomic<bool>& running);
-
-    void printWelcome();
+    TerminalUI(Motor& motor, Encoder& encoder, std::atomic<bool>& running);    void printWelcome();
     void printMotorInfo();
     void printHelp();
     void printStatus();
@@ -23,8 +23,6 @@ public:
 
 private:
     void handleControlCommand(const std::string& args);
-    void handlePositionCommand(const std::string& args);
-    void handleVelocityCommand(const std::string& args);
     void handleStopCommand();
     void handleStatusCommand();
     void handleHelpCommand();

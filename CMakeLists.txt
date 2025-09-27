@@ -12,7 +12,6 @@ add_executable(motor_simulator
     src/main.cpp
     src/Motor.cpp
     src/Encoder.cpp
-    src/MotorController.cpp
     src/TerminalUI.cpp
 )
 

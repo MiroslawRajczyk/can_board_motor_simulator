@@ -18,12 +18,12 @@ void Motor::update(double dt) {
     // At max control signal (1000), we should reach max angular velocity
     double target_velocity = (static_cast<double>(control_signal_) / static_cast<double>(max_control_signal_)) * max_angular_velocity_;
 
-    // Simple velocity control - move towards target velocity
+    // Simple velocity control - move towards target velocity with realistic time constant
     double velocity_error = target_velocity - angular_velocity_;
 
-    // Use a velocity time constant to control how fast we reach target velocity
-    double velocity_time_constant = 0.2; // 200ms time constant for smooth acceleration
-    double velocity_change = (velocity_error / velocity_time_constant) * dt;
+    // Use a realistic motor time constant (how fast motor reaches target speed)
+    const double motor_time_constant = 0.15; // 150ms time constant for faster motor response
+    double velocity_change = (velocity_error / motor_time_constant) * dt;
 
     // Update angular velocity
     angular_velocity_ += velocity_change;
@@ -33,11 +33,6 @@ void Motor::update(double dt) {
 
     // Update position
     angular_position_ += angular_velocity_ * dt;
-
-    // Stop motor completely when control signal is 0
-    if (control_signal_ == 0) {
-        angular_velocity_ = 0.0;
-    }
 }
 
 void Motor::setControlSignal(int control_signal) {

@@ -1,4 +1,5 @@
-#include "MotorController.h"
+#include "Motor.h"
+#include "Encoder.h"
 #include "TerminalUI.h"
 #include <iostream>
 #include <chrono>
@@ -8,15 +9,15 @@
 
 class MotorService {
 private:
-    MotorController controller_;
+    Motor motor_;
+    Encoder encoder_; // 18-bit absolute encoder, normal direction
     std::atomic<bool> running_;
     std::chrono::steady_clock::time_point last_update_;
     const double dt_ = 0.0001; // 0,1ms update cycle (10kHz)
 
 public:
-    MotorService() : running_(false) {
-        controller_.setPIDGains(5.0, 0.5, 0.1);
-    }
+    MotorService() :
+        motor_(120, 1000), encoder_(18, false), running_(false) { }
 
     void start() {
         running_ = true;
@@ -25,7 +26,7 @@ public:
 
     void stop() {
         running_ = false;
-        controller_.stop();
+        motor_.setControlSignal(0);
     }
 
     void update() {
@@ -33,12 +34,11 @@ public:
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update_);
 
         if (elapsed.count() >= 100) { // 0.1ms update cycle (100 microseconds) for 10kHz
-            controller_.update(dt_);
+            motor_.update(dt_);
+            encoder_.update(motor_.getAngularVelocity(), dt_);
             last_update_ = now;
         }
-    }
-
-    bool isRunning() const {
+    }    bool isRunning() const {
         return running_;
     }
 
@@ -46,8 +46,12 @@ public:
         return running_;
     }
 
-    MotorController& getController() {
-        return controller_;
+    Motor& getMotor() {
+        return motor_;
+    }
+
+    Encoder& getEncoder() {
+        return encoder_;
     }
 
     void simulationLoop() {
@@ -60,7 +64,7 @@ public:
 
 int main() {
     MotorService service;
-    TerminalUI ui(service.getController(), service.getRunningRef());
+    TerminalUI ui(service.getMotor(), service.getEncoder(), service.getRunningRef());
 
     // Print welcome message and initial info
     ui.printWelcome();

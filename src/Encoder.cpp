@@ -2,7 +2,7 @@
 #include <cmath>
 
 Encoder::Encoder(int bit_resolution, bool direction_inverted)
-    : position_steps_(0), fractional_steps_(0.0), bit_resolution_(bit_resolution), 
+    : position_steps_(0), fractional_steps_(0.0), bit_resolution_(bit_resolution),
       angular_velocity_(0.0), direction_inverted_(direction_inverted) {
     max_steps_ = 1L << bit_resolution_;  // Bit shift is equivalent to 2^n
 }
