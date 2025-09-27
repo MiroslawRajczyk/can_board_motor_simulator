@@ -17,8 +17,13 @@ private:
 
 public:
     MotorService() :
-        motor_(120, 1000, 0.3),
-        encoder_(18, false),
+        motor_(Motor::builder()
+               .maxVelocityRPM(160.0)
+               .maxControlSignal(1000)
+               .timeConstant(0.3)),
+        encoder_(Encoder::builder()
+                .bitResolution(18)
+                .directionInverted(false)),
         running_(false) { }
 
     void start() {
