@@ -3,13 +3,13 @@
 
 /**
  * @brief Absolute rotary encoder simulation class
- * 
+ *
  * Simulates an absolute rotary encoder with configurable parameters:
  * - Bit resolution (determines steps per revolution: 2^bits)
  * - Direction inversion (normal or inverted counting direction)
  * - Position tracking in steps and radians
  * - Velocity measurement
- * 
+ *
  * Example usage:
  *   Encoder encoder = Encoder::builder()
  *       .bitResolution(18)        // 262,144 steps per revolution
@@ -19,7 +19,7 @@ class Encoder {
 public:
     /**
      * @brief Builder class for Encoder construction with fluent interface
-     * 
+     *
      * Provides a clear and flexible way to configure Encoder parameters.
      * Example usage:
      *   Encoder encoder = Encoder::builder()

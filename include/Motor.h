@@ -2,12 +2,12 @@
 
 /**
  * @brief DC Motor simulation class with configurable parameters
- * 
+ *
  * Simulates a DC motor with realistic physics including:
  * - Proportional velocity control (constant voltage -> constant steady-state velocity)
  * - Configurable time constant for acceleration/deceleration response
  * - Position and velocity tracking
- * 
+ *
  * Example usage:
  *   Motor motor = Motor::builder()
  *       .maxVelocityRPM(120.0)
@@ -18,7 +18,7 @@ class Motor {
 public:
     /**
      * @brief Builder class for Motor construction with fluent interface
-     * 
+     *
      * Provides a clear and flexible way to configure Motor parameters.
      * Example usage:
      *   Motor motor = Motor::builder()
