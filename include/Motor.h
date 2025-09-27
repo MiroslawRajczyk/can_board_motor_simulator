@@ -13,7 +13,7 @@ public:
     Motor(double max_angular_velocity_rpm = 60.0, int max_control_signal = 1000);
 
     // Update motor physics simulation
-    void update(double dt, double load_torque = 0.0);
+    void update(double dt);
 
     // Set control signal
     void setControlSignal(int control_signal);

@@ -29,7 +29,7 @@ public:
     MotorController();
 
     // Update the controller and motor simulation
-    void update(double dt, double load_torque = 0.0);
+    void update(double dt);
 
     // Control methods
     void setControlSignal(int control_signal);  // Open loop control

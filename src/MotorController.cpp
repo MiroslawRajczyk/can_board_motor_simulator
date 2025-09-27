@@ -10,7 +10,7 @@ MotorController::MotorController()
       is_running_(false) {
 }
 
-void MotorController::update(double dt, double load_torque) {
+void MotorController::update(double dt) {
     double control_output = 0.0;
 
     switch (control_mode_) {
@@ -63,7 +63,7 @@ void MotorController::update(double dt, double load_torque) {
     }
 
     // Update motor physics
-    motor_.update(dt, load_torque);
+    motor_.update(dt);
 
     // Update encoder with motor's angular velocity
     encoder_.update(motor_.getAngularVelocity(), dt);

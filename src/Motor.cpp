@@ -10,7 +10,7 @@ Motor::Motor(double max_angular_velocity_rpm, int max_control_signal)
     max_angular_velocity_ = max_angular_velocity_rpm * (2.0 * M_PI / 60.0);
 }
 
-void Motor::update(double dt, double load_torque) {
+void Motor::update(double dt) {
     // Clamp control signal to limits
     control_signal_ = std::clamp(control_signal_, -max_control_signal_, max_control_signal_);
 
