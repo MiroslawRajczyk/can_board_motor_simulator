@@ -12,9 +12,6 @@ Motor::Motor(double max_angular_velocity_rpm, int max_control_signal, double mot
 }
 
 void Motor::update(double dt) {
-    // Clamp control signal to limits
-    control_signal_ = std::clamp(control_signal_, -max_control_signal_, max_control_signal_);
-
     // Calculate target steady-state velocity based on control signal
     // At max control signal (1000), we should reach max angular velocity
     double target_velocity = (static_cast<double>(control_signal_) / static_cast<double>(max_control_signal_)) * max_angular_velocity_;
@@ -36,7 +33,7 @@ void Motor::update(double dt) {
 }
 
 void Motor::setControlSignal(int control_signal) {
-    control_signal_ = control_signal;
+    control_signal_ = std::clamp(control_signal, -max_control_signal_, max_control_signal_);
 }
 
 int Motor::getControlSignal() const { return control_signal_; }
