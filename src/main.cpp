@@ -12,7 +12,7 @@ private:
     Motor motor_;
     Encoder encoder_;
     std::atomic<bool> running_;
-    const double dt_ = 0.0001; // 0,1ms update cycle (10kHz)
+    const double simulationFrequency_ = 10000.0; // Simulation frequency in Hz (10kHz)
 
 public:
     MotorService() :
@@ -35,8 +35,9 @@ public:
     }
 
     void update() {
-        motor_.update(dt_);
-        encoder_.update(motor_.getAngularVelocity(), dt_);
+        const double dt = 1.0 / simulationFrequency_; // Calculate dt from frequency
+        motor_.update(dt);
+        encoder_.update(motor_.getAngularVelocity(), dt);
     }
 
     bool isRunning() const {
@@ -57,10 +58,11 @@ public:
 
     void simulationLoop() {
         auto next_update = std::chrono::steady_clock::now();
+        const auto update_interval = std::chrono::microseconds(static_cast<long>(1000000.0 / simulationFrequency_));
 
         while (running_) {
             update();
-            next_update += std::chrono::microseconds(100);
+            next_update += update_interval;
             std::this_thread::sleep_until(next_update);
         }
     }
