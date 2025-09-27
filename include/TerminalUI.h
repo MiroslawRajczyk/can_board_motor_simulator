@@ -1,5 +1,4 @@
-#ifndef TERMINAL_UI_H
-#define TERMINAL_UI_H
+#pragma once
 
 #include "Motor.h"
 #include "Encoder.h"
@@ -31,5 +30,3 @@ private:
     void handleQuitCommand();
     void handleUnknownCommand(const std::string& cmd);
 };
-
-#endif // TERMINAL_UI_H

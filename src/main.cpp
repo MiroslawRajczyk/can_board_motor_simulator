@@ -1,7 +1,7 @@
-#include "Motor.h"
-#include "Encoder.h"
+#include "Servo.h"
 #include "TerminalUI.h"
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 #include <thread>
 #include <string>
@@ -9,20 +9,18 @@
 
 class MotorService {
 private:
-    Motor motor_;
-    Encoder encoder_;
+    Servo servo_;
     std::atomic<bool> running_;
     static constexpr double simulationFrequencyHz_ = 20000.0;
 
 public:
     MotorService() :
-        motor_(Motor::builder()
+        servo_(Servo::builder()
                .maxVelocityRPM(160.0)
                .maxControlSignal(1000)
-               .timeConstant(0.3)),
-        encoder_(Encoder::builder()
-                .bitResolution(18)
-                .directionInverted(false)),
+               .timeConstant(0.3)
+               .encoderBitResolution(18)
+               .encoderDirectionInverted(false)),
         running_(false) { }
 
     void start() {
@@ -31,13 +29,12 @@ public:
 
     void stop() {
         running_ = false;
-        motor_.setControlSignal(0);
+        servo_.stop();
     }
 
     void update() {
         constexpr double dt = 1.0 / simulationFrequencyHz_;
-        motor_.update(dt);
-        encoder_.update(motor_.getAngularVelocity(), dt);
+        servo_.update(dt);
     }
 
     bool isRunning() const {
@@ -53,11 +50,11 @@ public:
     }
 
     Motor& getMotor() {
-        return motor_;
+        return servo_.getMotor();
     }
 
     Encoder& getEncoder() {
-        return encoder_;
+        return servo_.getEncoder();
     }
 
     void simulationLoop() {
