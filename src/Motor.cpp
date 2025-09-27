@@ -9,18 +9,22 @@ Motor::Motor(double max_angular_velocity_rpm, int max_control_signal, double mot
 
     // Convert RPM to rad/s: RPM * (2*π/60)
     max_angular_velocity_ = max_angular_velocity_rpm * (2.0 * M_PI / 60.0);
+
+    // Cache expensive calculations
+    inv_time_constant_ = 1.0 / motor_time_constant_;
+    inv_max_control_signal_ = 1.0 / static_cast<double>(max_control_signal_);
 }
 
 void Motor::update(double dt) {
     // Calculate target steady-state velocity based on control signal
     // At max control signal (1000), we should reach max angular velocity
-    double target_velocity = (static_cast<double>(control_signal_) / static_cast<double>(max_control_signal_)) * max_angular_velocity_;
+    double target_velocity = static_cast<double>(control_signal_) * inv_max_control_signal_ * max_angular_velocity_;
 
     // Simple velocity control - move towards target velocity with realistic time constant
     double velocity_error = target_velocity - angular_velocity_;
 
-    // Use the configurable motor time constant
-    double velocity_change = (velocity_error / motor_time_constant_) * dt;
+    // Use the configurable motor time constant (cached inverse)
+    double velocity_change = velocity_error * inv_time_constant_ * dt;
 
     // Update angular velocity
     angular_velocity_ += velocity_change;

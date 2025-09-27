@@ -90,6 +90,10 @@ private:
     double max_angular_velocity_;    // Maximum angular velocity (rad/s)
     double motor_time_constant_;     // Motor time constant (seconds)
 
+    // Cached values for performance optimization
+    double inv_time_constant_;       // 1.0 / motor_time_constant_ (cached)
+    double inv_max_control_signal_;  // 1.0 / max_control_signal_ (cached)
+
 public:
     Motor(double max_angular_velocity_rpm = 60.0, int max_control_signal = 1000, double motor_time_constant = 0.15);
 

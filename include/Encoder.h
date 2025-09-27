@@ -76,6 +76,10 @@ private:
     long max_steps_;          // Maximum steps per revolution (2^bit_resolution)
     bool direction_inverted_; // Encoder direction: false = normal, true = inverted
 
+    // Cached values for performance optimization
+    double steps_per_radian_; // max_steps_ / (2.0 * M_PI) (cached)
+    double radians_per_step_; // (2.0 * M_PI) / max_steps_ (cached)
+
     // Conversion helpers
     double stepsToRadians(long steps) const;
     long radiansToSteps(double radians) const;

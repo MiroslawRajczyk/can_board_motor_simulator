@@ -12,7 +12,6 @@ private:
     Motor motor_;
     Encoder encoder_;
     std::atomic<bool> running_;
-    std::chrono::steady_clock::time_point last_update_;
     const double dt_ = 0.0001; // 0,1ms update cycle (10kHz)
 
 public:
@@ -28,7 +27,6 @@ public:
 
     void start() {
         running_ = true;
-        last_update_ = std::chrono::steady_clock::now();
     }
 
     void stop() {
@@ -37,15 +35,11 @@ public:
     }
 
     void update() {
-        auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update_);
+        motor_.update(dt_);
+        encoder_.update(motor_.getAngularVelocity(), dt_);
+    }
 
-        if (elapsed.count() >= 100) { // 0.1ms update cycle (100 microseconds) for 10kHz
-            motor_.update(dt_);
-            encoder_.update(motor_.getAngularVelocity(), dt_);
-            last_update_ = now;
-        }
-    }    bool isRunning() const {
+    bool isRunning() const {
         return running_;
     }
 
@@ -62,9 +56,12 @@ public:
     }
 
     void simulationLoop() {
+        auto next_update = std::chrono::steady_clock::now();
+
         while (running_) {
             update();
-            std::this_thread::sleep_for(std::chrono::microseconds(100));
+            next_update += std::chrono::microseconds(100);
+            std::this_thread::sleep_until(next_update);
         }
     }
 };
