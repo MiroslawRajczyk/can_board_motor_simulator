@@ -7,8 +7,8 @@ Motor::Motor(double max_angular_velocity_rpm, int max_control_signal, double mot
       angular_position_(0.0), max_control_signal_(max_control_signal),
       motor_time_constant_(motor_time_constant) {
 
-    // Convert RPM to rad/s: RPM * (2*π/60)
-    max_angular_velocity_ = max_angular_velocity_rpm * (2.0 * M_PI / 60.0);
+    // Convert RPM to rad/s using constexpr helper
+    max_angular_velocity_ = rpmToRadPerSec(max_angular_velocity_rpm);
 
     // Cache expensive calculations
     inv_time_constant_ = 1.0 / motor_time_constant_;
@@ -39,14 +39,6 @@ void Motor::update(double dt) {
 void Motor::setControlSignal(int control_signal) {
     control_signal_ = std::clamp(control_signal, -max_control_signal_, max_control_signal_);
 }
-
-int Motor::getControlSignal() const { return control_signal_; }
-double Motor::getAngularVelocity() const { return angular_velocity_; }
-double Motor::getAngularPosition() const { return angular_position_; }
-
-double Motor::getMaxAngularVelocity() const { return max_angular_velocity_; }
-int Motor::getMaxControlSignal() const { return max_control_signal_; }
-double Motor::getMotorTimeConstant() const { return motor_time_constant_; }
 
 void Motor::setMaxControlSignal(int max_control_signal) {
     max_control_signal_ = max_control_signal;

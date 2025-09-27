@@ -1,6 +1,19 @@
 #pragma once
 #include <cmath>
 
+// Constexpr helpers for encoder calculations
+constexpr double radiansToSteps(double radians, long max_steps) {
+    return (radians * max_steps) / (2.0 * M_PI);
+}
+
+constexpr double stepsToRadians(long steps, long max_steps) {
+    return (steps * 2.0 * M_PI) / max_steps;
+}
+
+constexpr long maxStepsFromBits(int bit_resolution) {
+    return 1L << bit_resolution;
+}
+
 /**
  * @brief Absolute rotary encoder simulation class
  *

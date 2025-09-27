@@ -1,5 +1,13 @@
 #pragma once
 
+#include <cmath>
+#include <algorithm>
+
+// Constexpr helper for RPM to rad/s conversion
+constexpr double rpmToRadPerSec(double rpm) {
+    return rpm * (2.0 * M_PI / 60.0);
+}
+
 /**
  * @brief DC Motor simulation class with configurable parameters
  *
@@ -109,14 +117,14 @@ public:
     void setControlSignal(int control_signal);
 
     // Get motor state
-    int getControlSignal() const;
-    double getAngularVelocity() const;
-    double getAngularPosition() const;
+    int getControlSignal() const { return control_signal_; }
+    double getAngularVelocity() const { return angular_velocity_; }
+    double getAngularPosition() const { return angular_position_; }
 
     // Get motor parameters
-    double getMaxAngularVelocity() const;
-    int getMaxControlSignal() const;
-    double getMotorTimeConstant() const;
+    double getMaxAngularVelocity() const { return max_angular_velocity_; }
+    int getMaxControlSignal() const { return max_control_signal_; }
+    double getMotorTimeConstant() const { return motor_time_constant_; }
 
     // Set motor limits
     void setMaxControlSignal(int max_control_signal);

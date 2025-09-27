@@ -12,7 +12,7 @@ private:
     Motor motor_;
     Encoder encoder_;
     std::atomic<bool> running_;
-    const double simulationFrequencyHz_ = 20000.0;
+    static constexpr double simulationFrequencyHz_ = 20000.0;
 
 public:
     MotorService() :
@@ -35,7 +35,7 @@ public:
     }
 
     void update() {
-        const double dt = 1.0 / simulationFrequencyHz_; // Calculate dt from frequency
+        constexpr double dt = 1.0 / simulationFrequencyHz_;
         motor_.update(dt);
         encoder_.update(motor_.getAngularVelocity(), dt);
     }
@@ -62,7 +62,7 @@ public:
 
     void simulationLoop() {
         auto next_update = std::chrono::steady_clock::now();
-        const auto update_interval = std::chrono::microseconds(static_cast<long>(1000000.0 / simulationFrequencyHz_));
+        constexpr auto update_interval = std::chrono::microseconds(static_cast<long>(1000000.0 / simulationFrequencyHz_));
 
         while (running_) {
             update();

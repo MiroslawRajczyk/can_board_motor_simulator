@@ -4,7 +4,7 @@
 Encoder::Encoder(int bit_resolution, bool direction_inverted)
     : position_steps_(0), fractional_steps_(0.0), bit_resolution_(bit_resolution),
       direction_inverted_(direction_inverted) {
-    max_steps_ = 1L << bit_resolution_;  // Bit shift is equivalent to 2^n
+    max_steps_ = maxStepsFromBits(bit_resolution_);
 
     // Cache expensive calculations
     steps_per_radian_ = static_cast<double>(max_steps_) / (2.0 * M_PI);
