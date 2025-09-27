@@ -12,7 +12,7 @@ private:
     Motor motor_;
     Encoder encoder_;
     std::atomic<bool> running_;
-    const double simulationFrequency_ = 10000.0; // Simulation frequency in Hz (10kHz)
+    const double simulationFrequencyHz_ = 20000.0;
 
 public:
     MotorService() :
@@ -35,7 +35,7 @@ public:
     }
 
     void update() {
-        const double dt = 1.0 / simulationFrequency_; // Calculate dt from frequency
+        const double dt = 1.0 / simulationFrequencyHz_; // Calculate dt from frequency
         motor_.update(dt);
         encoder_.update(motor_.getAngularVelocity(), dt);
     }
@@ -48,6 +48,10 @@ public:
         return running_;
     }
 
+    double getSimulationFrequency() const {
+        return simulationFrequencyHz_;
+    }
+
     Motor& getMotor() {
         return motor_;
     }
@@ -58,7 +62,7 @@ public:
 
     void simulationLoop() {
         auto next_update = std::chrono::steady_clock::now();
-        const auto update_interval = std::chrono::microseconds(static_cast<long>(1000000.0 / simulationFrequency_));
+        const auto update_interval = std::chrono::microseconds(static_cast<long>(1000000.0 / simulationFrequencyHz_));
 
         while (running_) {
             update();
@@ -70,7 +74,7 @@ public:
 
 int main() {
     MotorService service;
-    TerminalUI ui(service.getMotor(), service.getEncoder(), service.getRunningRef());
+    TerminalUI ui(service.getMotor(), service.getEncoder(), service.getRunningRef(), service.getSimulationFrequency());
 
     // Print welcome message and initial info
     ui.printWelcome();

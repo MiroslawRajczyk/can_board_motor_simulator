@@ -4,15 +4,15 @@
 #include <sstream>
 #include <cmath>
 
-TerminalUI::TerminalUI(Motor& motor, Encoder& encoder, std::atomic<bool>& running)
-    : motor_(motor), encoder_(encoder), running_(running) {
+TerminalUI::TerminalUI(Motor& motor, Encoder& encoder, std::atomic<bool>& running, double simulationFrequencyHz)
+    : motor_(motor), encoder_(encoder), running_(running), simulationFrequencyHz_(simulationFrequencyHz) {
 }
 
 void TerminalUI::printWelcome() {
     std::cout << "=======================" << std::endl;
     std::cout << "= CAN Motor Simulator =" << std::endl;
     std::cout << "=======================" << std::endl;
-    std::cout << "Simulation frequency:: 10kHz" << std::endl;
+    std::cout << "Simulation frequency: " << simulationFrequencyHz_ << " Hz" << std::endl;
 }
 
 void TerminalUI::printMotorInfo() {

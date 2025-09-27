@@ -11,9 +11,11 @@ private:
     Motor& motor_;
     Encoder& encoder_;
     std::atomic<bool>& running_;
+    double simulationFrequencyHz_;
 
 public:
-    TerminalUI(Motor& motor, Encoder& encoder, std::atomic<bool>& running);    void printWelcome();
+    TerminalUI(Motor& motor, Encoder& encoder, std::atomic<bool>& running, double simulationFrequencyHz);
+    void printWelcome();
     void printMotorInfo();
     void printHelp();
     void printStatus();
