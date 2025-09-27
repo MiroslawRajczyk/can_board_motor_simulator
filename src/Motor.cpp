@@ -3,7 +3,7 @@
 #include <cmath>
 
 Motor::Motor(double max_angular_velocity_rpm, int max_control_signal)
-    : control_signal_(0), current_(0.0), torque_(0.0), angular_velocity_(0.0), 
+    : control_signal_(0), angular_velocity_(0.0),
       angular_position_(0.0), max_control_signal_(max_control_signal) {
 
     // Convert RPM to rad/s: RPM * (2*π/60)
@@ -34,17 +34,9 @@ void Motor::update(double dt, double load_torque) {
     // Update position
     angular_position_ += angular_velocity_ * dt;
 
-    // Calculate simplified current and torque for display purposes
-    // Higher velocity error means more "effort" needed
-    double normalized_effort = std::abs(velocity_error) / max_angular_velocity_;
-    current_ = normalized_effort * static_cast<double>(std::abs(control_signal_)) / static_cast<double>(max_control_signal_) * 5.0;
-    torque_ = current_ * 0.01; // Simple torque calculation for display
-
     // Stop motor completely when control signal is 0
     if (control_signal_ == 0) {
         angular_velocity_ = 0.0;
-        current_ = 0.0;
-        torque_ = 0.0;
     }
 }
 
@@ -53,8 +45,6 @@ void Motor::setControlSignal(int control_signal) {
 }
 
 int Motor::getControlSignal() const { return control_signal_; }
-double Motor::getCurrent() const { return current_; }
-double Motor::getTorque() const { return torque_; }
 double Motor::getAngularVelocity() const { return angular_velocity_; }
 double Motor::getAngularPosition() const { return angular_position_; }
 
@@ -71,8 +61,6 @@ void Motor::setMaxAngularVelocity(double max_velocity_rpm) {
 
 void Motor::reset() {
     control_signal_ = 0;
-    current_ = 0.0;
-    torque_ = 0.0;
     angular_velocity_ = 0.0;
     angular_position_ = 0.0;
 }

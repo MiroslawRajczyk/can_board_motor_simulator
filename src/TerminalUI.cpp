@@ -56,7 +56,7 @@ void TerminalUI::printStatus() {
     const Encoder& encoder = controller_.getEncoder();
 
     std::cout << std::fixed << std::setprecision(3);
-    std::cout << "\n=== Motor Status ===" << std::endl;
+    std::cout << "\n====== Motor Status ======" << std::endl;
     std::cout << "Mode: " << controller_.getControlModeString() << std::endl;
     std::cout << "Running: " << (controller_.isRunning() ? "YES" : "NO") << std::endl;
     std::cout << "Position: " << encoder.getPositionSteps() << " steps ("
@@ -64,14 +64,12 @@ void TerminalUI::printStatus() {
               << (encoder.getPositionRadians() * 180.0 / M_PI) << "°)" << std::endl;
     std::cout << "Velocity: " << encoder.getVelocity() << " rad/s" << std::endl;
     std::cout << "Control Signal: " << motor.getControlSignal() << std::endl;
-    std::cout << "Current: " << motor.getCurrent() << " A" << std::endl;
-    std::cout << "Torque: " << motor.getTorque() << " Nm" << std::endl;
 
     if (controller_.getControlModeString() != "IDLE" && controller_.getControlModeString() != "OPEN_LOOP") {
         std::cout << "Setpoint: " << controller_.getSetpoint() << std::endl;
         std::cout << "Error: " << controller_.getCurrentError() << std::endl;
     }
-    std::cout << "===================" << std::endl;
+    std::cout << "==========================" << std::endl;
 }
 
 void TerminalUI::printPrompt() {

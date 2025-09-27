@@ -3,8 +3,6 @@
 class Motor {
 private:
     int control_signal_;      // Control signal (-1000 to +1000)
-    double current_;          // Motor current (A) - simplified calculation
-    double torque_;           // Output torque (Nm) - simplified calculation
     double angular_velocity_; // Angular velocity (rad/s)
     double angular_position_; // Angular position (rad)
 
@@ -22,8 +20,6 @@ public:
 
     // Get motor state
     int getControlSignal() const;
-    double getCurrent() const;
-    double getTorque() const;
     double getAngularVelocity() const;
     double getAngularPosition() const;
 
