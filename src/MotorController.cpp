@@ -12,59 +12,59 @@ MotorController::MotorController()
 
 void MotorController::update(double dt, double load_torque) {
     double control_output = 0.0;
-    
+
     switch (control_mode_) {
         case IDLE:
             // Motor is idle, no control signal applied
             motor_.setControlSignal(0);
             is_running_ = false;
             break;
-            
+
         case OPEN_LOOP:
             // Control signal is already set, no feedback control
             is_running_ = (motor_.getControlSignal() != 0);
             break;
-            
+
         case POSITION_CONTROL: {
             double current_position = encoder_.getPositionRadians();
             double error = setpoint_ - current_position;
-            
+
             // PID calculation
             integral_error_ += error * dt;
             double derivative_error = (error - previous_error_) / dt;
-            
+
             control_output = kp_ * error + ki_ * integral_error_ + kd_ * derivative_error;
             // Clamp to control signal range (-1000 to +1000)
             control_output = std::clamp(control_output, -1000.0, 1000.0);
-            
+
             motor_.setControlSignal(static_cast<int>(control_output));
             previous_error_ = error;
             is_running_ = true;
             break;
         }
-        
+
         case VELOCITY_CONTROL: {
             double current_velocity = encoder_.getVelocity();
             double error = setpoint_ - current_velocity;
-            
+
             // PID calculation
             integral_error_ += error * dt;
             double derivative_error = (error - previous_error_) / dt;
-            
+
             control_output = kp_ * error + ki_ * integral_error_ + kd_ * derivative_error;
             // Clamp to control signal range (-1000 to +1000)
             control_output = std::clamp(control_output, -1000.0, 1000.0);
-            
+
             motor_.setControlSignal(static_cast<int>(control_output));
             previous_error_ = error;
             is_running_ = true;
             break;
         }
     }
-    
+
     // Update motor physics
     motor_.update(dt, load_torque);
-    
+
     // Update encoder with motor's angular velocity
     encoder_.update(motor_.getAngularVelocity(), dt);
 }
@@ -100,7 +100,7 @@ void MotorController::stop() {
     previous_error_ = 0.0;
     setpoint_ = 0.0;
     is_running_ = false;
-    
+
     // Don't reset the motor - let it coast down naturally with physics
 }
 

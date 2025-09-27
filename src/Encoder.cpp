@@ -10,27 +10,27 @@ Encoder::Encoder(int bit_resolution, bool direction_inverted)
 void Encoder::update(double angular_velocity, double dt) {
     // Update velocity
     angular_velocity_ = angular_velocity;
-    
+
     // Calculate position change in radians
     double position_change_radians = angular_velocity * dt;
-    
+
     // Apply direction inversion if needed
     if (direction_inverted_) {
         position_change_radians = -position_change_radians;
     }
-    
+
     // Convert to fractional encoder steps (don't round yet)
     double fractional_steps_change = (position_change_radians * max_steps_) / (2.0 * M_PI);
-    
+
     // Accumulate fractional steps
     fractional_steps_ += fractional_steps_change;
-    
+
     // Extract whole steps and update position
     long whole_steps = static_cast<long>(fractional_steps_);
     if (whole_steps != 0) {
         position_steps_ += whole_steps;
         fractional_steps_ -= whole_steps; // Keep only the fractional part
-        
+
         // Handle wraparound: absolute encoders wrap around at max_steps
         position_steps_ = position_steps_ % max_steps_;
         if (position_steps_ < 0) {

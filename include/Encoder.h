@@ -16,22 +16,22 @@ private:
 
 public:
     Encoder(int bit_resolution = 18, bool direction_inverted = false);
-    
+
     // Update encoder position based on motor rotation
     void update(double angular_velocity, double dt);
-    
+
     // Get current position in steps
     long getPositionSteps() const;
-    
+
     // Get current position in radians
     double getPositionRadians() const;
-    
+
     // Get current velocity in rad/s
     double getVelocity() const;
-    
+
     // Reset encoder position to zero
     void reset();
-    
+
     // Get encoder specifications
     int getBitResolution() const;
     long getMaxSteps() const;

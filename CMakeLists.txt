@@ -13,6 +13,7 @@ add_executable(motor_simulator
     src/Motor.cpp
     src/Encoder.cpp
     src/MotorController.cpp
+    src/TerminalUI.cpp
 )
 
 # Include directories
