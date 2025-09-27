@@ -17,21 +17,24 @@ void TerminalUI::printWelcome() {
 
 void TerminalUI::printMotorInfo() {
     std::cout << "\nMotor Parameters:" << std::endl;
-    std::cout << "  Max Control Signal: " << motor_.getMaxControlSignal() << " (range: -" 
+    std::cout << "  Max Control Signal: " << motor_.getMaxControlSignal() << " (range: -"
               << motor_.getMaxControlSignal() << " to +" << motor_.getMaxControlSignal() << ")" << std::endl;
-    std::cout << "  Max Angular Velocity: " << (motor_.getMaxAngularVelocity() * 60.0 / (2.0 * M_PI)) 
+    std::cout << "  Max Angular Velocity: " << (motor_.getMaxAngularVelocity() * 60.0 / (2.0 * M_PI))
               << " RPM (" << motor_.getMaxAngularVelocity() << " rad/s)" << std::endl;
+    std::cout << "  Motor Time Constant: " << motor_.getMotorTimeConstant() << " seconds" << std::endl;
 
     std::cout << "\nEncoder Parameters:" << std::endl;
     std::cout << "  Type: Absolute Encoder" << std::endl;
     std::cout << "  Bit Resolution: " << encoder_.getBitResolution() << " bits" << std::endl;
     std::cout << "  Steps per Revolution: " << encoder_.getMaxSteps() << " steps" << std::endl;
-    std::cout << "  Resolution: " << (encoder_.getResolutionRadians() * 180.0 / M_PI) 
+    std::cout << "  Resolution: " << (encoder_.getResolutionRadians() * 180.0 / M_PI)
               << " degrees/step (" << encoder_.getResolutionRadians() << " rad/step)" << std::endl;
-    std::cout << "  Direction: " << (encoder_.isDirectionInverted() ? "INVERTED" : "NORMAL") 
-              << " (positive control signal " << (encoder_.isDirectionInverted() ? "decreases" : "increases") 
+    std::cout << "  Direction: " << (encoder_.isDirectionInverted() ? "INVERTED" : "NORMAL")
+              << " (positive control signal " << (encoder_.isDirectionInverted() ? "decreases" : "increases")
               << " encoder value)" << std::endl;
-}void TerminalUI::printHelp() {
+}
+
+void TerminalUI::printHelp() {
     std::cout << "\nAvailable commands:" << std::endl;
     std::cout << "  control <value>    - Set control signal directly (range: -1000 to +1000)" << std::endl;
     std::cout << "  stop               - Stop motor and set to idle" << std::endl;

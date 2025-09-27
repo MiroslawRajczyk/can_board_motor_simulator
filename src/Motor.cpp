@@ -2,9 +2,10 @@
 #include <algorithm>
 #include <cmath>
 
-Motor::Motor(double max_angular_velocity_rpm, int max_control_signal)
+Motor::Motor(double max_angular_velocity_rpm, int max_control_signal, double motor_time_constant)
     : control_signal_(0), angular_velocity_(0.0),
-      angular_position_(0.0), max_control_signal_(max_control_signal) {
+      angular_position_(0.0), max_control_signal_(max_control_signal),
+      motor_time_constant_(motor_time_constant) {
 
     // Convert RPM to rad/s: RPM * (2*π/60)
     max_angular_velocity_ = max_angular_velocity_rpm * (2.0 * M_PI / 60.0);
@@ -21,9 +22,8 @@ void Motor::update(double dt) {
     // Simple velocity control - move towards target velocity with realistic time constant
     double velocity_error = target_velocity - angular_velocity_;
 
-    // Use a realistic motor time constant (how fast motor reaches target speed)
-    const double motor_time_constant = 0.15; // 150ms time constant for faster motor response
-    double velocity_change = (velocity_error / motor_time_constant) * dt;
+    // Use the configurable motor time constant
+    double velocity_change = (velocity_error / motor_time_constant_) * dt;
 
     // Update angular velocity
     angular_velocity_ += velocity_change;
@@ -45,6 +45,7 @@ double Motor::getAngularPosition() const { return angular_position_; }
 
 double Motor::getMaxAngularVelocity() const { return max_angular_velocity_; }
 int Motor::getMaxControlSignal() const { return max_control_signal_; }
+double Motor::getMotorTimeConstant() const { return motor_time_constant_; }
 
 void Motor::setMaxControlSignal(int max_control_signal) {
     max_control_signal_ = max_control_signal;

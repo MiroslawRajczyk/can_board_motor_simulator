@@ -10,14 +10,16 @@
 class MotorService {
 private:
     Motor motor_;
-    Encoder encoder_; // 18-bit absolute encoder, normal direction
+    Encoder encoder_;
     std::atomic<bool> running_;
     std::chrono::steady_clock::time_point last_update_;
     const double dt_ = 0.0001; // 0,1ms update cycle (10kHz)
 
 public:
     MotorService() :
-        motor_(120, 1000), encoder_(18, false), running_(false) { }
+        motor_(120, 1000, 0.3),
+        encoder_(18, false),
+        running_(false) { }
 
     void start() {
         running_ = true;

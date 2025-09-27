@@ -8,9 +8,10 @@ private:
 
     int max_control_signal_;         // Maximum control signal (1000)
     double max_angular_velocity_;    // Maximum angular velocity (rad/s)
+    double motor_time_constant_;     // Motor time constant (seconds)
 
 public:
-    Motor(double max_angular_velocity_rpm = 60.0, int max_control_signal = 1000);
+    Motor(double max_angular_velocity_rpm = 60.0, int max_control_signal = 1000, double motor_time_constant = 0.15);
 
     // Update motor physics simulation
     void update(double dt);
@@ -26,6 +27,7 @@ public:
     // Get motor parameters
     double getMaxAngularVelocity() const;
     int getMaxControlSignal() const;
+    double getMotorTimeConstant() const;
 
     // Set motor limits
     void setMaxControlSignal(int max_control_signal);
