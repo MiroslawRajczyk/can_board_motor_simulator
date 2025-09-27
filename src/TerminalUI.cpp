@@ -52,7 +52,7 @@ void TerminalUI::printStatus() {
     std::cout << "Position: " << encoder_.getPositionSteps() << " steps ("
               << encoder_.getPositionRadians() << " rad, "
               << (encoder_.getPositionRadians() * 180.0 / M_PI) << "°)" << std::endl;
-    std::cout << "Velocity: " << encoder_.getVelocity() << " rad/s" << std::endl;
+    std::cout << "Velocity: " << motor_.getAngularVelocity() << " rad/s" << std::endl;
     std::cout << "Control Signal: " << motor_.getControlSignal() << std::endl;
     std::cout << "==========================" << std::endl;
 }

@@ -8,7 +8,6 @@
  * - Bit resolution (determines steps per revolution: 2^bits)
  * - Direction inversion (normal or inverted counting direction)
  * - Position tracking in steps and radians
- * - Velocity measurement
  *
  * Example usage:
  *   Encoder encoder = Encoder::builder()
@@ -75,7 +74,6 @@ private:
     double fractional_steps_; // Accumulated fractional steps
     int bit_resolution_;      // Encoder bit resolution (e.g., 12 bits)
     long max_steps_;          // Maximum steps per revolution (2^bit_resolution)
-    double angular_velocity_; // Angular velocity in rad/s
     bool direction_inverted_; // Encoder direction: false = normal, true = inverted
 
     // Conversion helpers
@@ -98,9 +96,6 @@ public:
 
     // Get current position in radians
     double getPositionRadians() const;
-
-    // Get current velocity in rad/s
-    double getVelocity() const;
 
     // Reset encoder position to zero
     void reset();

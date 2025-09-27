@@ -3,14 +3,11 @@
 
 Encoder::Encoder(int bit_resolution, bool direction_inverted)
     : position_steps_(0), fractional_steps_(0.0), bit_resolution_(bit_resolution),
-      angular_velocity_(0.0), direction_inverted_(direction_inverted) {
+      direction_inverted_(direction_inverted) {
     max_steps_ = 1L << bit_resolution_;  // Bit shift is equivalent to 2^n
 }
 
 void Encoder::update(double angular_velocity, double dt) {
-    // Update velocity
-    angular_velocity_ = angular_velocity;
-
     // Calculate position change in radians
     double position_change_radians = angular_velocity * dt;
 
@@ -47,14 +44,9 @@ double Encoder::getPositionRadians() const {
     return stepsToRadians(position_steps_);
 }
 
-double Encoder::getVelocity() const {
-    return angular_velocity_;
-}
-
 void Encoder::reset() {
     position_steps_ = 0;
     fractional_steps_ = 0.0;
-    angular_velocity_ = 0.0;
 }
 
 int Encoder::getBitResolution() const {
