@@ -6,7 +6,6 @@
 int main() {
     SimulationEngine simulation;
 
-    // Add additional servos to demonstrate multiple servo support
     simulation.addServo(Servo::builder()
                        .maxVelocityRPM(120.0)
                        .maxControlSignal(800)
