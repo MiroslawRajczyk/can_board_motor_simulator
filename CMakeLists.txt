@@ -14,6 +14,8 @@ add_executable(motor_simulator
     src/Encoder.cpp
     src/TerminalUI.cpp
     src/SimulationEngine.cpp
+    src/CanBoard.cpp
+    src/CanSocket.cpp
 )
 
 # Include directories
