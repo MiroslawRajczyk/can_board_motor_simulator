@@ -6,6 +6,10 @@
 
 TerminalUI::TerminalUI(Motor& motor, Encoder& encoder, std::atomic<bool>& running, double simulationFrequencyHz)
     : motor_(motor), encoder_(encoder), running_(running), simulationFrequencyHz_(simulationFrequencyHz) {
+    printWelcome();
+    printMotorInfo();
+    printHelp();
+    printPrompt();
 }
 
 void TerminalUI::printWelcome() {

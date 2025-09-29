@@ -80,15 +80,9 @@ public:
 
 int main() {
     SimulationEngine simulation;
-    TerminalUI ui(simulation.getMotor(), simulation.getEncoder(), simulation.getRunningRef(), simulation.getSimulationFrequency());
-
-    ui.printWelcome();
-
     simulation.start();
 
-    ui.printMotorInfo();
-    ui.printHelp();
-    ui.printPrompt();
+    TerminalUI ui(simulation.getMotor(), simulation.getEncoder(), simulation.getRunningRef(), simulation.getSimulationFrequency());
 
     // Process user commands
     std::string command;
