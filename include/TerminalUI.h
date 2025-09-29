@@ -1,19 +1,18 @@
 #pragma once
 
-#include "Motor.h"
-#include "Encoder.h"
+#include "SimulationEngine.h"
 #include <string>
 #include <atomic>
 
 class TerminalUI {
 private:
-    Motor& motor_;
-    Encoder& encoder_;
+    SimulationEngine& simulation_;
     std::atomic<bool>& running_;
     double simulationFrequencyHz_;
+    size_t currentServoIndex_;
 
 public:
-    TerminalUI(Motor& motor, Encoder& encoder, std::atomic<bool>& running, double simulationFrequencyHz);
+    TerminalUI(SimulationEngine& simulation, std::atomic<bool>& running, double simulationFrequencyHz);
     void printWelcome();
     void printMotorInfo();
     void printHelp();
@@ -29,4 +28,8 @@ private:
     void handleHelpCommand();
     void handleQuitCommand();
     void handleUnknownCommand(const std::string& cmd);
+    void handleSelectServoCommand(const std::string& args);
+    void handleListServosCommand();
+    void handleStatusAllCommand();
+    void handleStopAllCommand();
 };
