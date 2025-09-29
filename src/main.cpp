@@ -11,6 +11,7 @@ class MotorService {
 private:
     Servo servo_;
     std::atomic<bool> running_;
+    std::thread simulationThread_;
     static constexpr double simulationFrequencyHz_ = 20000.0;
 
 public:
@@ -23,13 +24,21 @@ public:
                .encoderDirectionInverted(false)),
         running_(false) { }
 
+    ~MotorService() {
+        stop();
+    }
+
     void start() {
         running_ = true;
+        simulationThread_ = std::thread(&MotorService::simulationLoop, this);
     }
 
     void stop() {
         running_ = false;
         servo_.stop();
+        if (simulationThread_.joinable()) {
+            simulationThread_.join();
+        }
     }
 
     void update() {
@@ -73,7 +82,6 @@ int main() {
     MotorService service;
     TerminalUI ui(service.getMotor(), service.getEncoder(), service.getRunningRef(), service.getSimulationFrequency());
 
-    // Print welcome message and initial info
     ui.printWelcome();
 
     service.start();
@@ -82,18 +90,14 @@ int main() {
     ui.printHelp();
     ui.printPrompt();
 
-    // Start the simulation loop in a separate thread
-    std::thread simulationThread(&MotorService::simulationLoop, &service);
-
     // Main service loop - process user commands
     std::string command;
     while (service.isRunning() && std::getline(std::cin, command)) {
         ui.processCommand(command);
     }
 
-    // Stop the service and wait for the simulation thread to finish
+    // Stop the service
     service.stop();
-    simulationThread.join();
 
     std::cout << "Motor service stopped." << std::endl;
     return 0;
