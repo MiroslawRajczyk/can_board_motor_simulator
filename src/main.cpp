@@ -7,7 +7,7 @@
 #include <string>
 #include <atomic>
 
-class MotorService {
+class SimulationEngine {
 private:
     Servo servo_;
     std::atomic<bool> running_;
@@ -15,7 +15,7 @@ private:
     static constexpr double simulationFrequencyHz_ = 20000.0;
 
 public:
-    MotorService() :
+    SimulationEngine() :
         servo_(Servo::builder()
                .maxVelocityRPM(160.0)
                .maxControlSignal(1000)
@@ -24,13 +24,13 @@ public:
                .encoderDirectionInverted(false)),
         running_(false) { }
 
-    ~MotorService() {
+    ~SimulationEngine() {
         stop();
     }
 
     void start() {
         running_ = true;
-        simulationThread_ = std::thread(&MotorService::simulationLoop, this);
+        simulationThread_ = std::thread(&SimulationEngine::simulationLoop, this);
     }
 
     void stop() {
@@ -79,26 +79,25 @@ public:
 };
 
 int main() {
-    MotorService service;
-    TerminalUI ui(service.getMotor(), service.getEncoder(), service.getRunningRef(), service.getSimulationFrequency());
+    SimulationEngine simulation;
+    TerminalUI ui(simulation.getMotor(), simulation.getEncoder(), simulation.getRunningRef(), simulation.getSimulationFrequency());
 
     ui.printWelcome();
 
-    service.start();
+    simulation.start();
 
     ui.printMotorInfo();
     ui.printHelp();
     ui.printPrompt();
 
-    // Main service loop - process user commands
+    // Process user commands
     std::string command;
-    while (service.isRunning() && std::getline(std::cin, command)) {
+    while (simulation.isRunning() && std::getline(std::cin, command)) {
         ui.processCommand(command);
     }
 
-    // Stop the service
-    service.stop();
+    simulation.stop();
 
-    std::cout << "Motor service stopped." << std::endl;
+    std::cout << "Simulation stopped." << std::endl;
     return 0;
 }
