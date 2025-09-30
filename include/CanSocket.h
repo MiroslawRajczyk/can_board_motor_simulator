@@ -65,15 +65,6 @@ public:
      * @return true if sent successfully, false otherwise
      */
     bool sendFrame(const struct can_frame& frame);
-    
-    /**
-     * @brief Send a CAN frame with data
-     * @param can_id CAN ID
-     * @param data Data bytes (up to 8 bytes)
-     * @param data_length Number of data bytes (0-8)
-     * @return true if sent successfully, false otherwise
-     */
-    bool sendFrame(uint32_t can_id, const uint8_t* data, uint8_t data_length);
 
     /**
      * @brief Start receiving CAN frames in background thread

@@ -54,7 +54,6 @@ bool CanSocket::open() {
         return false;
     }
 
-    std::cout << "CanSocket: Opened CAN socket on interface " << interface_name_ << std::endl;
     return true;
 }
 
@@ -66,7 +65,6 @@ void CanSocket::close() {
     if (socket_fd_ >= 0) {
         ::close(socket_fd_);
         socket_fd_ = -1;
-        std::cout << "CanSocket: Closed CAN socket" << std::endl;
     }
 }
 
@@ -75,7 +73,6 @@ bool CanSocket::isOpen() const {
 }
 
 bool CanSocket::sendFrame(const struct can_frame& frame) {
-    // Minimize mutex holding time - just check and copy fd
     int fd;
     {
         std::lock_guard<std::mutex> lock(socket_mutex_);
@@ -83,10 +80,9 @@ bool CanSocket::sendFrame(const struct can_frame& frame) {
             std::cerr << "CanSocket: Socket not open" << std::endl;
             return false;
         }
-        fd = socket_fd_; // Copy fd to use outside lock
+        fd = socket_fd_;
     }
 
-    // Perform the actual write without holding the mutex
     ssize_t bytes_sent = write(fd, &frame, sizeof(frame));
     if (bytes_sent != sizeof(frame)) {
         std::cerr << "CanSocket: Failed to send frame: " << getLastError() << std::endl;
@@ -96,31 +92,9 @@ bool CanSocket::sendFrame(const struct can_frame& frame) {
     return true;
 }
 
-bool CanSocket::sendFrame(uint32_t can_id, const uint8_t* data, uint8_t data_length) {
-    if (data_length > 8) {
-        std::cerr << "CanSocket: Data length exceeds 8 bytes" << std::endl;
-        return false;
-    }
-
-    struct can_frame frame;
-    frame.can_id = can_id;
-    frame.can_dlc = data_length;
-
-    if (data && data_length > 0) {
-        std::memcpy(frame.data, data, data_length);
-    }
-
-    // Clear unused bytes
-    for (int i = data_length; i < 8; ++i) {
-        frame.data[i] = 0;
-    }
-
-    return sendFrame(frame);
-}
-
 bool CanSocket::startReceiving(ReceiveCallback callback) {
     if (receiving_) {
-        return true; // Already receiving
+        return true;
     }
 
     if (!isOpen()) {
@@ -132,13 +106,12 @@ bool CanSocket::startReceiving(ReceiveCallback callback) {
     receiving_ = true;
     receive_thread_ = std::thread(&CanSocket::receiveLoop, this);
 
-    std::cout << "CanSocket: Started receiving CAN frames" << std::endl;
     return true;
 }
 
 void CanSocket::stopReceiving() {
     if (!receiving_) {
-        return; // Not receiving
+        return;
     }
 
     receiving_ = false;
@@ -146,8 +119,6 @@ void CanSocket::stopReceiving() {
     if (receive_thread_.joinable()) {
         receive_thread_.join();
     }
-
-    std::cout << "CanSocket: Stopped receiving CAN frames" << std::endl;
 }
 
 bool CanSocket::isReceiving() const {
@@ -155,14 +126,13 @@ bool CanSocket::isReceiving() const {
 }
 
 bool CanSocket::receiveFrame(struct can_frame& frame, int timeout_ms) {
-    // Don't hold the mutex during the entire poll operation
     int fd;
     {
         std::lock_guard<std::mutex> lock(socket_mutex_);
         if (socket_fd_ < 0) {
             return false;
         }
-        fd = socket_fd_; // Copy the fd to use outside the lock
+        fd = socket_fd_;
     }
 
     if (timeout_ms > 0) {
@@ -172,14 +142,12 @@ bool CanSocket::receiveFrame(struct can_frame& frame, int timeout_ms) {
 
         int poll_result = poll(&pfd, 1, timeout_ms);
         if (poll_result <= 0) {
-            return false; // Timeout or error
+            return false;
         }
     }
 
-    // Only acquire mutex for the actual read operation
     std::lock_guard<std::mutex> lock(socket_mutex_);
     if (socket_fd_ != fd || socket_fd_ < 0) {
-        // Socket was closed/changed while we were polling
         return false;
     }
 
@@ -199,7 +167,7 @@ bool CanSocket::setFilters(const struct can_filter* filters, size_t filter_count
         return false;
     }
 
-    if (setsockopt(socket_fd_, SOL_CAN_RAW, CAN_RAW_FILTER, filters, 
+    if (setsockopt(socket_fd_, SOL_CAN_RAW, CAN_RAW_FILTER, filters,
                    filter_count * sizeof(struct can_filter)) < 0) {
         std::cerr << "CanSocket: Failed to set filters: " << getLastError() << std::endl;
         return false;

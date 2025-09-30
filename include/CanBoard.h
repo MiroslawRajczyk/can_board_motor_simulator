@@ -44,9 +44,9 @@ private:
     std::atomic<int> currentControlSignal_;
 
     // Timer frequencies (in Hz)
-    static constexpr double ENCODER_READ_FREQUENCY = 300.0;  // 10 kHz encoder reading
-    static constexpr double CONTROL_UPDATE_FREQUENCY = 300.0; // 1 kHz control updates
-    static constexpr double CAN_TRANSMIT_FREQUENCY = 100.0;    // 100 Hz CAN transmission
+    static constexpr double ENCODER_READ_FREQUENCY = 300.0;
+    static constexpr double CONTROL_UPDATE_FREQUENCY = 300.0;
+    static constexpr double CAN_TRANSMIT_FREQUENCY = 100.0;
 
 public:
     /**

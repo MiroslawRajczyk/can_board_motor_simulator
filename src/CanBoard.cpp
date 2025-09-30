@@ -46,9 +46,6 @@ void CanBoard::start() {
             timerThreads_.emplace_back(&CanBoard::timerLoop, this, timer);
         }
     }
-
-    std::cout << "CanBoard[0x" << std::hex << can_id_ << std::dec << "]: Started with "
-            << timerThreads_.size() << " timers on interface " << can_socket_->getInterfaceName() << std::endl;
 }
 
 void CanBoard::stop() {
