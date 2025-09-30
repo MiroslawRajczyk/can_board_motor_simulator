@@ -6,7 +6,7 @@
 CanBoard::CanBoard(Servo& servo, uint32_t can_id, const std::string& can_interface)
     : servo_(servo), can_socket_(std::make_unique<CanSocket>(can_interface)),
     can_id_(can_id), running_(false), cachedEncoderSteps_(0),
-    cachedEncoderRadians_(0.0), currentControlSignal_(0) {
+    cachedEncoderRadians_(0.0), currentControlSignal_(1) {
     initializeTimers();
 }
 
@@ -144,6 +144,11 @@ void CanBoard::encoderReadTimer() {
 }
 
 void CanBoard::controlUpdateTimer() {
+    if (currentControlSignal_ == 1 || currentControlSignal_ == -1) {
+        servo_.setControlSignal(0);
+        return;
+    }
+
     servo_.setControlSignal(currentControlSignal_);
 }
 
@@ -193,7 +198,7 @@ void CanBoard::onCanFrameReceived(const struct can_frame& frame) {
             if (frame.can_dlc == 2) {
                 int8_t new_control = static_cast<int8_t>(frame.data[1]);
                 if (new_control == 1 || new_control == -1) { // Stop without position hold
-                    setControlSignal(0);
+                    setControlSignal(1);
 
                 } else if (new_control == 0) { // Stop with position hold
                     setControlSignal(0); // TODO: replace with position hold logic
