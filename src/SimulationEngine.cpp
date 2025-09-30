@@ -7,10 +7,6 @@ SimulationEngine::~SimulationEngine() {
     stop();
 }
 
-void SimulationEngine::addServo(const Servo& servo) {
-    servos_.push_back(servo);
-}
-
 void SimulationEngine::addServo(Servo&& servo) {
     servos_.emplace_back(std::move(servo));
 }

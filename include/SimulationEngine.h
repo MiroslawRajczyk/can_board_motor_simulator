@@ -17,7 +17,6 @@ public:
     SimulationEngine();
     ~SimulationEngine();
 
-    void addServo(const Servo& servo);
     void addServo(Servo&& servo);
 
     size_t getServoCount() const;

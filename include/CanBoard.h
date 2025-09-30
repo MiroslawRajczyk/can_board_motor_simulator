@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Servo.h"
 #include "CanSocket.h"
 #include <atomic>
 #include <thread>
@@ -9,6 +8,9 @@
 #include <vector>
 #include <mutex>
 #include <memory>
+
+// Forward declaration to avoid circular dependency
+class Servo;
 
 /**
  * @brief CAN board hardware simulation for servo systems

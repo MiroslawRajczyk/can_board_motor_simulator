@@ -2,24 +2,29 @@
 
 #include "Motor.h"
 #include "Encoder.h"
+#include "CanBoard.h"
+#include <memory>
+#include <string>
+#include <optional>
 
 /**
- * @brief Servo class that combines Motor and Encoder
+ * @brief Servo class that combines Motor, Encoder, and CanBoard
  *
  * This class provides an interface for a servo system that includes
- * both the motor physics simulation and encoder position tracking.
- * The motor and encoder are automatically synchronized during updates.
+ * the motor physics simulation, encoder position tracking, and CAN communication.
+ * The motor, encoder, and CAN board are automatically synchronized during updates.
  */
 class Servo {
 private:
     Motor motor_;
     Encoder encoder_;
+    std::unique_ptr<CanBoard> can_board_;
 
 public:
     /**
      * @brief Builder class for Servo construction with fluent interface
      *
-     * Provides a clear way to configure both Motor and Encoder parameters
+     * Provides a clear way to configure Motor, Encoder, and CanBoard parameters
      * in a single builder pattern.
      */
     class Builder {
@@ -32,6 +37,11 @@ public:
         // Encoder parameters
         int bit_resolution_ = 18;
         bool direction_inverted_ = false;
+
+        // CanBoard parameters
+        uint32_t can_id_ = 0x00;
+        std::string can_interface_ = "vcan0";
+        bool can_enabled_ = true;
 
     public:
         /**
@@ -75,11 +85,35 @@ public:
         }
 
         /**
+         * @brief Set CAN ID for the servo
+         */
+        Builder& canId(uint32_t id) {
+            can_id_ = id;
+            return *this;
+        }
+
+        /**
+         * @brief Set CAN interface name
+         */
+        Builder& canInterface(const std::string& interface) {
+            can_interface_ = interface;
+            return *this;
+        }
+
+        /**
+         * @brief Enable or disable CAN communication
+         */
+        Builder& canEnabled(bool enabled) {
+            can_enabled_ = enabled;
+            return *this;
+        }
+
+        /**
          * @brief Build the Servo
          */
         Servo build() {
             return Servo(max_velocity_rpm_, max_control_signal_, motor_time_constant_,
-                         bit_resolution_, direction_inverted_);
+                         bit_resolution_, direction_inverted_, can_id_, can_interface_, can_enabled_);
         }
 
         /**
@@ -92,20 +126,29 @@ public:
 
 private:
     Servo(double max_velocity_rpm, int max_control_signal, double motor_time_constant,
-          int bit_resolution, bool direction_inverted)
-        : motor_(Motor::builder()
-                 .maxVelocityRPM(max_velocity_rpm)
-                 .maxControlSignal(max_control_signal)
-                 .timeConstant(motor_time_constant)),
-          encoder_(Encoder::builder()
-                   .bitResolution(bit_resolution)
-                   .directionInverted(direction_inverted)) {}
+          int bit_resolution, bool direction_inverted, uint32_t can_id, 
+          const std::string& can_interface, bool can_enabled);
 
 public:
     /**
      * @brief Default constructor with reasonable defaults
      */
-    Servo() : Servo(160.0, 1000, 0.3, 18, false) {}
+    Servo();
+
+    /**
+     * @brief Move constructor
+     */
+    Servo(Servo&& other) noexcept;
+
+    /**
+     * @brief Move assignment operator
+     */
+    Servo& operator=(Servo&& other) noexcept;
+
+    /**
+     * @brief Destructor
+     */
+    ~Servo();
 
     /**
      * @brief Create a builder instance
@@ -115,7 +158,17 @@ public:
     }
 
     /**
-     * @brief Update both motor and encoder physics
+     * @brief Start the servo and CAN communication
+     */
+    void start();
+
+    /**
+     * @brief Stop the servo and CAN communication
+     */
+    void stop();
+
+    /**
+     * @brief Update motor and encoder physics
      * @param dt Time step in seconds
      */
     void update(double dt) {
@@ -143,18 +196,17 @@ public:
     const Encoder& getEncoder() const { return encoder_; }
 
     /**
-     * @brief Reset both motor and encoder to initial state
+     * @brief Get CAN board reference for direct access
+     */
+    CanBoard* getCanBoard() { return can_board_ ? can_board_.get() : nullptr; }
+    const CanBoard* getCanBoard() const { return can_board_ ? can_board_.get() : nullptr; }
+
+    /**
+     * @brief Reset motor and encoder to initial state
      */
     void reset() {
         motor_.reset();
         encoder_.reset();
-    }
-
-    /**
-     * @brief Stop the motor (set control signal to 0)
-     */
-    void stop() {
-        motor_.setControlSignal(0);
     }
 
     // Convenience methods that delegate to motor
@@ -165,4 +217,12 @@ public:
     // Convenience methods that delegate to encoder
     long getEncoderPosition() const { return encoder_.getPositionSteps(); }
     double getEncoderPositionRadians() const { return encoder_.getPositionRadians(); }
+
+    // Convenience methods that delegate to CAN board
+    uint32_t getCanId() const;
+    bool isCanEnabled() const { return can_board_ != nullptr; }
+
+    // Delete copy constructor and assignment operator to prevent copying
+    Servo(const Servo&) = delete;
+    Servo& operator=(const Servo&) = delete;
 };
