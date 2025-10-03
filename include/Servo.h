@@ -3,6 +3,7 @@
 #include "Motor.h"
 #include "Encoder.h"
 #include <memory>
+#include <string>
 
 // Forward declaration to avoid circular dependency
 class CanBoard;
