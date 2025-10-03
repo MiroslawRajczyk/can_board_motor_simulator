@@ -1,4 +1,5 @@
 #include "CanBoard.h"
+#include "Servo.h"
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -66,7 +67,6 @@ void CanBoard::stop() {
     }
 
     timerThreads_.clear();
-    std::cout << "CanBoard[0x" << std::hex << can_id_ << std::dec << "]: Stopped all timers" << std::endl;
 }
 
 bool CanBoard::isRunning() const {

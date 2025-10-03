@@ -7,10 +7,6 @@ SimulationEngine::~SimulationEngine() {
     stop();
 }
 
-void SimulationEngine::addServo(const Servo& servo) {
-    servos_.push_back(servo);
-}
-
 void SimulationEngine::addServo(Servo&& servo) {
     servos_.emplace_back(std::move(servo));
 }
@@ -36,6 +32,12 @@ const Servo& SimulationEngine::getServo(size_t index) const {
 void SimulationEngine::start() {
     running_ = true;
     simulationThread_ = std::thread(&SimulationEngine::simulationLoop, this);
+
+    // Start CAN for all servos
+    for (auto& servo : servos_) {
+        servo.startCAN();
+    }
+
 }
 
 void SimulationEngine::stop() {
@@ -43,8 +45,14 @@ void SimulationEngine::stop() {
     for (auto& servo : servos_) {
         servo.stop();
     }
+
     if (simulationThread_.joinable()) {
         simulationThread_.join();
+    }
+
+    // Stop CAN for all servos
+    for (auto& servo : servos_) {
+        servo.stopCAN();
     }
 }
 
