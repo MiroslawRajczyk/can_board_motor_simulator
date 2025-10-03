@@ -1,77 +1,41 @@
 #include "SimulationEngine.h"
+#include "ConfigLoader.h"
 #include <iostream>
 #include <string>
 
 int main() {
     SimulationEngine simulation;
 
-    simulation.addServo(Servo::builder()
-                       .maxVelocityRPM(2.0)
-                       .maxControlSignal(100)
-                       .timeConstant(0.02)
-                       .encoderBitResolution(18)
-                       .encoderDirectionInverted(false)
-                       .canId(0x10)
-                       .canInterface("vcan0"));
+    // Load servo configurations from JSON file
+    std::cout << "Loading servo configurations from servos.json..." << std::endl;
+    auto servos = ConfigLoader::loadServosFromFile("servos.json");
+    
+    if (servos.empty()) {
+        std::cerr << "No servos loaded! Check servos.json file." << std::endl;
+        return 1;
+    }
+    
+    // Add all loaded servos to simulation
+    for (auto& servo : servos) {
+        simulation.addServo(std::move(servo));
+    }
 
-    simulation.addServo(Servo::builder()
-                       .maxVelocityRPM(4.0)
-                       .maxControlSignal(100)
-                       .timeConstant(0.022)
-                       .encoderBitResolution(18)
-                       .encoderDirectionInverted(false)
-                       .canId(0x11)
-                       .canInterface("vcan0"));
-
-    simulation.addServo(Servo::builder()
-                       .maxVelocityRPM(4.0)
-                       .maxControlSignal(100)
-                       .timeConstant(0.025)
-                       .encoderBitResolution(18)
-                       .encoderDirectionInverted(false)
-                       .canId(0x12)
-                       .canInterface("vcan0"));
-
-    simulation.addServo(Servo::builder()
-                       .maxVelocityRPM(14.0)
-                       .maxControlSignal(100)
-                       .timeConstant(0.022)
-                       .encoderBitResolution(18)
-                       .encoderDirectionInverted(false)
-                       .canId(0x13)
-                       .canInterface("vcan0"));
-
-    simulation.addServo(Servo::builder()
-                       .maxVelocityRPM(2.8)
-                       .maxControlSignal(100)
-                       .timeConstant(0.022)
-                       .encoderBitResolution(18)
-                       .encoderDirectionInverted(false)
-                       .canId(0x14)
-                       .canInterface("vcan0"));
-
-    simulation.addServo(Servo::builder()
-                       .maxVelocityRPM(15.8)
-                       .maxControlSignal(100)
-                       .timeConstant(0.022)
-                       .encoderBitResolution(18)
-                       .canId(0x15)
-                       .canInterface("vcan0"));
-
-    simulation.addServo(Servo::builder()
-                       .maxVelocityRPM(10.0)
-                       .maxControlSignal(100)
-                       .timeConstant(0.012)
-                       .encoderBitResolution(18)
-                       .encoderDirectionInverted(false)
-                       .canId(0x16)
-                       .canInterface("vcan0"));
-
+    std::cout << "Starting simulation with " << simulation.getServoCount() << " servos..." << std::endl;
     simulation.start();
+
+    // Start CAN communication for all servos
+    for (size_t i = 0; i < simulation.getServoCount(); ++i) {
+        simulation.getServo(i).startCAN();
+    }
 
     // Wait for program termination (e.g., Ctrl+C)
     std::cout << "Press Enter to stop the simulation..." << std::endl;
     std::cin.get();
+
+    // Stop CAN communication for all servos
+    for (size_t i = 0; i < simulation.getServoCount(); ++i) {
+        simulation.getServo(i).stopCAN();
+    }
 
     simulation.stop();
     return 0;

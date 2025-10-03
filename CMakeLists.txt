@@ -13,6 +13,7 @@ add_executable(motor_simulator
     src/Motor.cpp
     src/Encoder.cpp
     src/Servo.cpp
+    src/ConfigLoader.cpp
     src/SimulationEngine.cpp
     src/CanBoard.cpp
     src/CanSocket.cpp

@@ -1,0 +1,72 @@
+[
+  {
+    "name": "servo_1",
+    "maxVelocityRPM": 2.0,
+    "maxControlSignal": 100,
+    "timeConstant": 0.02,
+    "encoderBitResolution": 18,
+    "encoderDirectionInverted": false,
+    "canId": 16,
+    "canInterface": "vcan0"
+  },
+  {
+    "name": "servo_2",
+    "maxVelocityRPM": 4.0,
+    "maxControlSignal": 100,
+    "timeConstant": 0.022,
+    "encoderBitResolution": 18,
+    "encoderDirectionInverted": false,
+    "canId": 17,
+    "canInterface": "vcan0"
+  },
+  {
+    "name": "servo_3",
+    "maxVelocityRPM": 4.0,
+    "maxControlSignal": 100,
+    "timeConstant": 0.025,
+    "encoderBitResolution": 18,
+    "encoderDirectionInverted": false,
+    "canId": 18,
+    "canInterface": "vcan0"
+  },
+  {
+    "name": "servo_4",
+    "maxVelocityRPM": 14.0,
+    "maxControlSignal": 100,
+    "timeConstant": 0.022,
+    "encoderBitResolution": 18,
+    "encoderDirectionInverted": false,
+    "canId": 19,
+    "canInterface": "vcan0"
+  },
+  {
+    "name": "servo_5",
+    "maxVelocityRPM": 2.8,
+    "maxControlSignal": 100,
+    "timeConstant": 0.022,
+    "encoderBitResolution": 18,
+    "encoderDirectionInverted": false,
+    "canId": 20,
+    "canInterface": "vcan0"
+  },
+  {
+    "name": "servo_6",
+    "maxVelocityRPM": 15.8,
+    "maxControlSignal": 100,
+    "timeConstant": 0.022,
+    "encoderBitResolution": 18,
+    "encoderDirectionInverted": false,
+    "canId": 21,
+    "canInterface": "vcan0"
+  },
+  {
+    "name": "servo_7",
+    "maxVelocityRPM": 10.0,
+    "maxControlSignal": 100,
+    "timeConstant": 0.012,
+    "encoderBitResolution": 18,
+    "encoderDirectionInverted": false,
+    "canId": 22,
+    "canInterface": "vcan0"
+  }
+]
